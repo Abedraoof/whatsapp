@@ -1,0 +1,1156 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#070b14">
+<title>ConvoLens — Conversation Intelligence</title>
+
+<!--
+  CONVOLENS FRONTEND / SINGLE-FILE EDITION
+
+  What is new:
+  - English-first product UI, with Arabic UI toggle.
+  - Arabic / English / Hebrew / Russian / Italian / Spanish + mixed-language detection.
+  - Stronger WhatsApp parser: multiline messages, system-message tolerance, multiple date formats.
+  - Relationship-pattern layer based on observable signals, NOT mind-reading:
+      reciprocity, initiation, pursuit/response asymmetry, responsiveness, warmth,
+      question engagement, conversation continuity.
+  - Conflict radar: clusters messages containing multilingual conflict/friction signals,
+      with time-window detection.
+  - Emoji intelligence: top emojis, diversity, sender usage.
+  - Semantic NLP mode:
+      lazy-loads Hugging Face Transformers.js from CDN and uses a multilingual
+      sentence-transformer model when available; gracefully falls back to TF-IDF.
+  - Advanced topic discovery using multilingual keyword seeds + semantic similarity.
+  - Useful charts with Chart.js.
+  - Free vs Pro gating in the UI.
+  - Pro checkout button calls YOUR backend endpoint:
+      POST /api/create-checkout-session
+    Never put Stripe secret keys in this file.
+  - Pro AI insights button calls YOUR backend endpoint:
+      POST /api/ai-insights
+    Never expose an OpenAI/AI key in the browser.
+
+  Production note:
+  The local engine can work entirely in the browser. For AI + payments, deploy a
+  secure backend and HTTPS.
+-->
+
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://unpkg.com" crossorigin>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"></script>
+
+<style>
+:root{
+  --bg:#050812;--bg2:#08111c;--panel:rgba(11,18,30,.86);--panel2:#0d1724;
+  --line:#1b2a3c;--line2:#29445c;--text:#f4f8ff;--muted:#8ea2b8;
+  --cyan:#4fd8ff;--blue:#5b7cff;--violet:#a78bfa;--green:#31e891;
+  --gold:#ffc857;--red:#ff6685;--orange:#ff995a;
+  --shadow:0 30px 100px rgba(0,0,0,.45);--radius:20px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;min-height:100vh;color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,
+  BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:
+  radial-gradient(850px 480px at 7% -5%,rgba(50,128,255,.20),transparent 60%),
+  radial-gradient(900px 540px at 96% 8%,rgba(132,62,255,.17),transparent 59%),
+  linear-gradient(180deg,#04070e 0,#07101a 45%,#04070c 100%);
+}
+body:before{
+  content:"";position:fixed;inset:0;pointer-events:none;opacity:.12;
+  background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:42px 42px;
+}
+button,input{font:inherit}button{cursor:pointer}
+.app{width:min(1280px,100%);margin:auto;padding:18px}
+.topbar{height:60px;display:flex;align-items:center;justify-content:space-between;gap:15px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:950;font-size:21px;letter-spacing:-.7px}
+.logo{width:36px;height:36px;display:grid;place-items:center;border-radius:12px;
+background:linear-gradient(145deg,var(--cyan),var(--violet));box-shadow:0 0 32px rgba(79,216,255,.16)}
+.brand em{font-style:normal;color:var(--cyan)}
+.toolbar{display:flex;align-items:center;gap:8px}
+.pill,.tinybtn{
+  border:1px solid var(--line);background:#09131f;color:var(--text);border-radius:999px;
+  padding:8px 11px;font-size:11px
+}
+.tinybtn{border-radius:10px}
+.live{font:10px ui-monospace,SFMono-Regular,monospace;color:var(--green);
+border:1px solid #155837;background:#061b13;border-radius:999px;padding:7px 10px}
+.hero{padding:72px 0 35px;max-width:1030px}
+.kicker{font:800 11px ui-monospace,SFMono-Regular,monospace;letter-spacing:2px;color:var(--cyan)}
+.hero h1{font-size:clamp(44px,7vw,82px);line-height:.96;letter-spacing:-4px;margin:13px 0 19px}
+.grad{background:linear-gradient(90deg,var(--cyan),var(--violet),var(--green));
+-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{font-size:18px;line-height:1.75;color:var(--muted);max-width:860px;margin:0}
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:19px}
+.tag{border:1px solid var(--line);background:#09131f;color:#b9cad9;border-radius:999px;padding:7px 10px;font-size:10px}
+.upload{
+position:relative;overflow:hidden;border:1px solid #28445d;border-radius:26px;padding:35px;
+background:linear-gradient(140deg,rgba(15,28,43,.94),rgba(7,14,23,.96));
+box-shadow:var(--shadow);transition:.25s
+}
+.upload.drag{border-color:var(--cyan);transform:translateY(-2px);box-shadow:0 35px 100px rgba(44,192,255,.14)}
+.upload:after{content:"";position:absolute;inset:auto -20% -80% 14%;height:160px;
+background:radial-gradient(circle,rgba(79,216,255,.11),transparent 68%);pointer-events:none}
+.uploadin{position:relative;z-index:1;text-align:center}
+.uploadico{font-size:44px;filter:drop-shadow(0 9px 25px rgba(79,216,255,.15))}
+.upload h3{margin:8px 0 5px;font-size:21px}.upload p{margin:0 auto 17px;color:var(--muted);font-size:13px;max-width:740px;line-height:1.6}
+input[type=file]{display:none}
+.btn{
+border:0;border-radius:12px;padding:13px 19px;font-weight:900;color:#00131c;
+background:linear-gradient(90deg,var(--cyan),#79caff);box-shadow:0 12px 32px rgba(79,216,255,.15)
+}
+.btn.dark{color:var(--text);background:#101d2b;border:1px solid var(--line);box-shadow:none}
+.btn.pro{color:#fff;background:linear-gradient(100deg,#7c3aed,#22d3ee)}
+.privacy{display:inline-flex;margin-top:15px;gap:6px;align-items:center;font-size:10px;color:#7fe8ad;
+border:1px solid #185838;background:#061c13;border-radius:999px;padding:6px 10px}
+.status{min-height:28px;padding:10px 2px;color:var(--muted);font-size:12px}
+.error{display:none;padding:13px 14px;color:#ffd4dc;background:#28111a;border:1px solid #67293b;border-radius:12px}
+#dashboard{display:none}.section{margin-top:18px}
+.head{display:flex;align-items:end;justify-content:space-between;gap:15px;margin-bottom:12px}
+.head h2{margin:0;font-size:18px;letter-spacing:-.3px}.head .sub{margin:0;color:var(--muted);font-size:11px}
+.cards{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.card,.panel{background:linear-gradient(180deg,rgba(11,18,28,.90),rgba(8,14,23,.94));
+border:1px solid var(--line);border-radius:17px;box-shadow:0 15px 50px rgba(0,0,0,.15)}
+.card{padding:15px;min-height:105px}.label{font-size:9px;color:var(--muted);letter-spacing:.7px}
+.value{margin-top:9px;font:900 25px/1.2 ui-monospace,SFMono-Regular,monospace}.muted{color:var(--muted)}
+.cyan{color:var(--cyan)}.green{color:var(--green)}.violet{color:var(--violet)}
+.gold{color:var(--gold)}.red{color:var(--red)}.orange{color:var(--orange)}
+.panel{padding:18px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.grid3{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:15px}
+.pulsegrid{display:grid;grid-template-columns:195px 1fr 260px;gap:24px;align-items:center}
+.score{
+width:176px;height:176px;border-radius:50%;margin:auto;display:grid;place-items:center;position:relative;
+background:conic-gradient(var(--cyan) 0deg,var(--green) 0deg,#172333 0deg)
+}
+.score:after{content:"";position:absolute;inset:12px;border-radius:50%;background:#09111b}
+.scorein{position:relative;z-index:2;text-align:center}.scoren{font-size:46px;font-weight:950;line-height:1}
+.scores{font:10px ui-monospace,SFMono-Regular,monospace;color:var(--muted);margin-top:5px}
+.meters{display:grid;gap:14px}
+.meterhead{display:flex;justify-content:space-between;gap:10px;font-size:11px}
+.track{height:8px;background:#162433;border-radius:99px;overflow:hidden}.fill{height:100%;border-radius:99px;
+background:linear-gradient(90deg,var(--cyan),var(--green))}
+.note{padding:14px;border-radius:14px;border:1px solid var(--line);background:#09131e}
+.note .big{font-size:28px;font-weight:950}.note small{display:block;color:var(--muted);font-size:10px;line-height:1.6;margin-top:6px}
+.list{display:grid;gap:4px}.row{display:flex;justify-content:space-between;gap:12px;align-items:center;
+padding:11px 0;border-bottom:1px solid #182534}.row:last-child{border-bottom:0}
+.rowmain{min-width:0}.title{font-size:13px;font-weight:800}.subtxt{font-size:10px;color:var(--muted);margin-top:3px}
+.barline{display:grid;grid-template-columns:150px 1fr 48px;gap:8px;align-items:center;font-size:11px}
+.barlabel{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.signalgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.signal{padding:11px;border:1px solid var(--line);background:#09131d;border-radius:11px}
+.signal strong{font-size:13px}.signal span{display:block;color:var(--muted);font-size:9px;margin-top:3px}
+.insight{border:1px solid var(--line);background:#09131e;border-radius:12px;padding:13px;margin-top:8px}
+.insight .tag2{font:900 9px ui-monospace,SFMono-Regular,monospace;letter-spacing:1px;color:var(--cyan)}
+.insight p{font-size:12px;line-height:1.55;margin:5px 0 0}.insight small{display:block;color:#70869b;margin-top:7px;font-size:9px}
+.chartbox{height:270px}.chartbox.sm{height:210px}.chartbox canvas{width:100%!important;height:100%!important}
+.emojiwrap{display:flex;flex-wrap:wrap;gap:8px}.emoji{
+display:flex;align-items:center;gap:7px;padding:9px 10px;background:#0a1520;border:1px solid var(--line);
+border-radius:12px;font-size:18px}.emoji b{font:800 10px ui-monospace,SFMono-Regular,monospace;color:var(--muted)}
+.topic{display:grid;grid-template-columns:150px 1fr 50px;gap:10px;align-items:center;margin:10px 0;font-size:11px}
+.chip2{border:1px solid var(--line);background:#09131e;border-radius:10px;padding:8px 9px;font-size:10px;color:#b9c7d4}
+.story{
+border:1px solid #263b52;background:linear-gradient(135deg,rgba(11,21,34,.96),rgba(10,17,28,.96));
+border-radius:16px;padding:16px
+}.story h3{margin:0 0 7px}.story p{margin:0;color:#c0cfdd;font-size:12px;line-height:1.7}
+.pay{
+margin-top:18px;padding:23px;border-radius:20px;border:1px solid #4e421a;
+background:linear-gradient(125deg,rgba(28,21,10,.94),rgba(10,17,26,.96));
+display:flex;align-items:center;justify-content:space-between;gap:18px
+}.pay h3{margin:0 0 5px}.pay p{margin:0;color:var(--muted);font-size:11px;max-width:770px;line-height:1.6}
+.progrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+.profeature{padding:12px;border:1px solid #4e421a;background:#17140d;border-radius:12px}
+.profeature strong{font-size:11px}.profeature span{display:block;color:#a99a7e;font-size:9px;margin-top:4px;line-height:1.5}
+.lock{position:relative;overflow:hidden}
+.lock:after{content:"PRO";position:absolute;top:10px;right:10px;font:900 8px ui-monospace,SFMono-Regular,monospace;
+letter-spacing:1px;color:#e8d39a;background:#2a220f;border:1px solid #57481f;border-radius:999px;padding:4px 6px}
+.blur{filter:blur(5px);opacity:.45;user-select:none}
+.foot{color:#61758a;font-size:9px;line-height:1.65;margin:15px 2px}
+.toast{position:fixed;z-index:20;left:50%;bottom:20px;transform:translateX(-50%);
+background:#0d1925;border:1px solid var(--line2);padding:12px 14px;border-radius:12px;box-shadow:var(--shadow);display:none;font-size:11px}
+.modal{
+position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.68);display:none;place-items:center;padding:20px;backdrop-filter:blur(12px)
+}.modalbox{
+width:min(560px,100%);border:1px solid #33465d;background:#09111c;border-radius:20px;padding:22px;box-shadow:var(--shadow)
+}.modalhead{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.price{font:900 34px ui-monospace,SFMono-Regular,monospace;margin:12px 0;color:var(--cyan)}
+.modal ul{margin:10px 0 15px;padding-left:20px;color:#bac7d3;font-size:11px;line-height:1.8}
+.rowBtns{display:flex;gap:8px;justify-content:flex-end}
+.small{font-size:9px;color:var(--muted);line-height:1.5}
+@media(max-width:1100px){
+.cards{grid-template-columns:repeat(3,1fr)}.pulsegrid{grid-template-columns:190px 1fr}.note{grid-column:1/-1}
+}
+@media(max-width:780px){
+.grid2,.grid3,.pulsegrid{grid-template-columns:1fr}.cards{grid-template-columns:repeat(2,1fr)}
+.progrid{grid-template-columns:1fr}.barline{grid-template-columns:95px 1fr 42px}.topic{grid-template-columns:95px 1fr 40px}
+.live{display:none}.hero h1{letter-spacing:-2px}.chartbox{height:240px}
+}
+@media(max-width:500px){.app{padding:11px}.hero{padding-top:40px}.hero p{font-size:15px}
+.cards{grid-template-columns:1fr 1fr}.toolbar .pill{display:none}.chartbox{height:220px}
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+<header class="topbar">
+  <div class="brand"><div class="logo">✦</div>Convo<em>Lens</em></div>
+  <div class="toolbar">
+    <button class="tinybtn" id="langBtn">العربية</button>
+    <span class="live">● LOCAL + NLP</span>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="kicker">CONVERSATION INTELLIGENCE / X</div>
+  <h1 id="heroTitle">See the <span class="grad">signals</span> behind the messages.</h1>
+  <p id="heroDesc">
+    Upload a WhatsApp export and get a clean, visual answer to what actually happened in the conversation:
+    who initiates, who responds, where friction appears, what languages and emojis dominate, and how the dynamic changes over time.
+  </p>
+  <div class="tags">
+    <span class="tag">Arabic</span><span class="tag">English</span><span class="tag">עברית</span>
+    <span class="tag">Русский</span><span class="tag">Italiano</span><span class="tag">Español</span>
+    <span class="tag">Mixed conversations</span><span class="tag">Multilingual NLP</span>
+  </div>
+</section>
+
+<section class="upload" id="dropZone">
+  <div class="uploadin">
+    <div class="uploadico">◈</div>
+    <label class="btn" id="uploadBtn" for="file">Analyze WhatsApp export</label>
+    <input id="file" type="file" accept=".txt,text/plain">
+    <h3 id="fileName">Drop your .txt conversation here</h3>
+    <p id="uploadHint">
+      The core analysis runs locally in your browser. Neural semantic analysis is loaded only when requested.
+      Your chat is not sent anywhere by the basic analyzer.
+    </p>
+    <span class="privacy">🔒 Privacy-first core analysis</span>
+  </div>
+</section>
+
+<div class="status" id="status"></div>
+<div class="error" id="error"></div>
+
+<main id="dashboard">
+
+<section class="section">
+  <div class="cards">
+    <div class="card"><div class="label">MESSAGES</div><div class="value green" id="totalMsgs">0</div></div>
+    <div class="card"><div class="label">WORDS</div><div class="value cyan" id="totalWords">0</div></div>
+    <div class="card"><div class="label">SESSIONS</div><div class="value violet" id="sessionCount">0</div></div>
+    <div class="card"><div class="label">AVG REPLY</div><div class="value gold" id="avgReply">—</div></div>
+    <div class="card"><div class="label">LANGUAGE MIX</div><div class="value" id="language">—</div></div>
+    <div class="card"><div class="label">DATA CONFIDENCE</div><div class="value" id="confidence">—</div></div>
+  </div>
+</section>
+
+<section class="section panel">
+  <div class="head"><div><h2>Conversation Pulse</h2><p class="sub">One glance. The strongest measurable signals.</p></div>
+  <button class="tinybtn" id="semanticBtn">Enable Neural NLP</button></div>
+  <div class="pulsegrid">
+    <div id="score" class="score"><div class="scorein"><div class="scoren" id="pulse">0</div><div class="scores">PULSE / 100</div></div></div>
+    <div class="meters" id="meters"></div>
+    <div class="note"><div class="label">DATA CONFIDENCE</div><div class="big" id="confidenceBig">—</div>
+      <small id="confidenceText">Confidence measures parse quality and usable timing evidence. It is not a psychological certainty score.</small>
+    </div>
+  </div>
+</section>
+
+<section class="section grid2">
+  <div class="panel">
+    <div class="head"><div><h2>Who drives the conversation?</h2><p class="sub">Observable initiation + response behavior.</p></div></div>
+    <div id="balance" class="list"></div>
+  </div>
+  <div class="panel">
+    <div class="head"><div><h2>What does it suggest?</h2><p class="sub">Useful interpretation, not mind-reading.</p></div></div>
+    <div id="insights"></div>
+  </div>
+</section>
+
+<section class="section grid3">
+  <div class="panel">
+    <div class="head"><div><h2>Participants</h2><p class="sub">Share · starts · questions</p></div></div>
+    <div id="participants" class="list"></div>
+  </div>
+  <div class="panel">
+    <div class="head"><div><h2>Language DNA</h2><p class="sub">6-language detector</p></div></div>
+    <div id="languageDNA" class="signalgrid"></div>
+  </div>
+  <div class="panel">
+    <div class="head"><div><h2>Message tone</h2><p class="sub">Lexical, not emotional diagnosis</p></div></div>
+    <div id="tone" class="signalgrid"></div>
+  </div>
+</section>
+
+<section class="section grid2">
+  <div class="panel">
+    <div class="head"><div><h2>Initiation vs Response</h2><p class="sub">Who starts, who keeps it moving?</p></div></div>
+    <div class="chartbox"><canvas id="initChart"></canvas></div>
+  </div>
+  <div class="panel">
+    <div class="head"><div><h2>Conversation Energy</h2><p class="sub">Message volume across the timeline</p></div></div>
+    <div class="chartbox"><canvas id="energyChart"></canvas></div>
+  </div>
+</section>
+
+<section class="section grid2">
+  <div class="panel">
+    <div class="head"><div><h2>Emoji DNA</h2><p class="sub">Most-used reactions and their distribution</p></div></div>
+    <div id="emojiWrap" class="emojiwrap"></div>
+    <div class="chartbox sm" style="margin-top:10px"><canvas id="emojiChart"></canvas></div>
+  </div>
+  <div class="panel">
+    <div class="head"><div><h2>Conflict Radar</h2><p class="sub">Detected friction clusters — not proof of a fight.</p></div></div>
+    <div id="conflictSummary"></div>
+    <div class="chartbox sm" style="margin-top:10px"><canvas id="conflictChart"></canvas></div>
+  </div>
+</section>
+
+<section class="section panel">
+  <div class="head"><div><h2>Topic Radar</h2><p class="sub">Keyword + phrase evidence, optionally enhanced by semantic NLP.</p></div></div>
+  <div id="topics"></div>
+</section>
+
+<section class="section panel">
+  <div class="head"><div><h2>How the relationship pattern moves</h2><p class="sub">Changes in reciprocity, response speed and message depth.</p></div></div>
+  <div class="chartbox"><canvas id="trendChart"></canvas></div>
+</section>
+
+<section class="section grid2">
+  <div class="panel">
+    <div class="head"><div><h2>Change Engine</h2><p class="sub">Early segment vs recent segment.</p></div></div>
+    <div id="trends" class="grid3"></div>
+  </div>
+  <div class="panel">
+    <div class="head"><div><h2>Conversation Sessions</h2><p class="sub">Adaptive inactivity boundary.</p></div></div>
+    <div id="sessions" class="list"></div>
+  </div>
+</section>
+
+<section class="section panel">
+  <div class="head"><div><h2>AI Story</h2><p class="sub">Turns the measured signals into one readable summary.</p></div>
+  <button class="tinybtn" id="aiBtn">Generate AI Story <span style="color:#d8bdff">PRO</span></button></div>
+  <div id="story" class="story">
+    <h3>Start with the local engine.</h3>
+    <p>The free engine already shows who starts, who replies, response timing, conflict clusters, language mix, emoji patterns and change over time. The Pro AI Story turns those measurements into a concise narrative.</p>
+  </div>
+</section>
+
+<section class="section pay">
+  <div>
+    <h3>⚡ ConvoLens Pro</h3>
+    <p>Designed for the features that feel like a real product: advanced semantic topic discovery, multi-chat comparison, saved profiles, AI Story, deeper conflict timelines, exports, longitudinal tracking and premium relationship-pattern views.</p>
+    <div class="progrid">
+      <div class="profeature"><strong>🧠 Semantic NLP</strong><span>Multilingual sentence embeddings instead of simple keyword matching.</span></div>
+      <div class="profeature"><strong>🧩 Compare chats</strong><span>See whether a communication pattern is specific to one conversation.</span></div>
+      <div class="profeature"><strong>📈 Longitudinal view</strong><span>Save snapshots and track how a conversation changes month to month.</span></div>
+    </div>
+  </div>
+  <button class="btn pro" id="proBtn">Unlock Pro</button>
+</section>
+
+<section class="section panel">
+  <div class="head"><div><h2>Message Stream</h2><p class="sub">Last 25 messages, safely rendered.</p></div></div>
+  <div style="overflow:auto">
+    <table style="width:100%;border-collapse:collapse;font-size:11px;min-width:780px">
+      <thead><tr><th style="text-align:left;padding:9px;color:#8ea2b8">DATE</th><th style="text-align:left;padding:9px;color:#8ea2b8">SENDER</th><th style="text-align:left;padding:9px;color:#8ea2b8">MESSAGE</th><th style="text-align:left;padding:9px;color:#8ea2b8">REPLY</th><th style="text-align:left;padding:9px;color:#8ea2b8">WORDS</th></tr></thead>
+      <tbody id="recent"></tbody>
+    </table>
+  </div>
+</section>
+
+<div class="foot">
+  ConvoLens reports observable communication signals. “More initiating” means more session starts, not “more in love.”
+  “Conflict cluster” means the language around a time window contains more friction markers; it is not proof of a real-world argument.
+  The neural model is an assistive NLP layer and can make mistakes. For production, keep AI and payment secrets on your backend.
+</div>
+</main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="modal" id="proModal">
+  <div class="modalbox">
+    <div class="modalhead"><div><div class="kicker">CONVOLENS PRO</div><h2 style="margin:5px 0 0">From dashboard to intelligence.</h2></div>
+      <button class="tinybtn" id="closeModal">✕</button></div>
+    <div class="price">$9.99 / month</div>
+    <ul>
+      <li>Semantic multilingual NLP + smarter topic discovery.</li>
+      <li>AI Story and advanced relationship-pattern summaries.</li>
+      <li>Conflict timeline + anomaly detection.</li>
+      <li>Compare multiple conversations.</li>
+      <li>Saved profiles + longitudinal tracking.</li>
+      <li>Exportable reports.</li>
+    </ul>
+    <div class="small">The final amount, taxes and payment methods are handled by Stripe Checkout. Do not enter card details into ConvoLens itself.</div>
+    <div class="rowBtns" style="margin-top:15px">
+      <button class="btn dark" id="cancelPro">Not now</button>
+      <button class="btn pro" id="checkoutBtn">Continue to secure checkout</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================
+   PRODUCT STATE
+   ========================= */
+const $ = id => document.getElementById(id);
+let APP_LANG = 'en';
+let LAST = null;
+let charts = {};
+let NEURAL = null;
+let NEURAL_LOADING = false;
+
+const I18N = {
+  en:{
+    lang:'العربية',
+    title:'See the <span class="grad">signals</span> behind the messages.',
+    desc:'Upload a WhatsApp export and get a clean, visual answer to what actually happened in the conversation: who initiates, who responds, where friction appears, what languages and emojis dominate, and how the dynamic changes over time.',
+    upload:'Analyze WhatsApp export',file:'Drop your .txt conversation here'
+  },
+  ar:{
+    lang:'English',
+    title:'شاهد <span class="grad">الإشارات</span> خلف الرسائل.',
+    desc:'ارفع تصدير WhatsApp واحصل على صورة بصرية واضحة: من يبدأ، من يرد، أين يظهر الاحتكاك، ما اللغات والإيموجيز المسيطرة، وكيف تتغير ديناميكية المحادثة مع الوقت.',
+    upload:'حلّل محادثة WhatsApp',file:'ضع ملف المحادثة .txt هنا'
+  }
+};
+function applyLang(){
+  const t=I18N[APP_LANG];
+  document.documentElement.lang=APP_LANG;
+  document.documentElement.dir=APP_LANG==='ar'?'rtl':'ltr';
+  $('langBtn').textContent=t.lang;
+  $('heroTitle').innerHTML=t.title;
+  $('heroDesc').textContent=t.desc;
+  $('uploadBtn').textContent=t.upload;
+  if($('dashboard').style.display==='block' && LAST) render(LAST);
+}
+$('langBtn').onclick=()=>{APP_LANG=APP_LANG==='en'?'ar':'en';applyLang()};
+
+/* =========================
+   FILE + PARSING
+   ========================= */
+const drop = $('dropZone'), file = $('file');
+file.addEventListener('change',e=>e.target.files[0]&&loadFile(e.target.files[0]));
+['dragenter','dragover'].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.add('drag')}));
+['dragleave','drop'].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.remove('drag')}));
+drop.addEventListener('drop',e=>e.dataTransfer.files[0]&&loadFile(e.dataTransfer.files[0]));
+
+function loadFile(f){
+  if(!/\.txt$/i.test(f.name)){fail('Please choose a WhatsApp .txt export.');return}
+  $('fileName').textContent='✓ '+f.name;
+  $('status').textContent='Parsing messages, timing, languages and patterns…';
+  $('error').style.display='none';
+  const r=new FileReader();
+  r.onload=e=>{try{analyze(e.target.result)}catch(err){console.error(err);fail('Could not safely analyze this export. Please verify that it is a WhatsApp text export.')}};
+  r.onerror=()=>fail('Could not read the file.');
+  r.readAsText(f,'UTF-8');
+}
+function normalize(text){
+  return text.replace(/^\uFEFF/,'').replace(/\r\n?/g,'\n')
+    .replace(/[\u200E\u200F\u202A-\u202E\u2066-\u2069]/g,'');
+}
+
+/* Several WhatsApp export formats:
+   31/08/2026, 13:42 - Name: hello
+   [31/08/2026, 13:42] Name: hello
+   8/31/26, 1:42 PM - Name: hello
+*/
+const MESSAGE_PATTERNS = [
+  /^(?:\[)?(\d{1,4}[\/.\-]\d{1,2}[\/.\-]\d{1,4}),?\s+(\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM|am|pm)?)\]?\s*[-–—]\s*([^:]+):\s?(.*)$/i,
+  /^(?:\[)?(\d{1,4}[\/.\-]\d{1,2}[\/.\-]\d{1,4}),?\s+(\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM|am|pm)?)\]?\s+([^:]+):\s?(.*)$/i
+];
+const ANY_ENTRY_RE=/^(?:\[)?\d{1,4}[\/.\-]\d{1,2}[\/.\-]\d{1,4},?\s+\d{1,2}:\d{2}/;
+
+function parseMessages(text){
+  const lines=normalize(text).split('\n'),out=[];let cur=null;
+  for(const raw of lines){
+    const line=raw.trimEnd();
+    let m=null;
+    for(const re of MESSAGE_PATTERNS){const z=line.match(re);if(z){m=z;break}}
+    if(m){if(cur)out.push(cur);cur={date:m[1],time:m[2],sender:m[3].trim(),text:m[4].trim()};continue}
+    if(ANY_ENTRY_RE.test(line)){if(cur)out.push(cur);cur=null;continue}
+    if(cur&&line.trim())cur.text+=(cur.text?'\n':'')+line.trim();
+  }
+  if(cur)out.push(cur);
+  return out;
+}
+function parseDate(date,time){
+  const p=date.split(/[\/.\-]/).map(Number);
+  let a=p[0],b=p[1],c=p[2]; c=c<100?2000+c:c;
+  let day,month;
+  /* If ambiguous, default to day/month (common in WhatsApp exports outside the US).
+     We keep the original string for display. */
+  if(a>12){day=a;month=b}else if(b>12){month=a;day=b}else{day=a;month=b}
+  let z=time.trim().replace(/\s+/g,' ').toUpperCase();
+  const ap=z.match(/\b(AM|PM)$/);
+  const q=z.replace(/\s*(AM|PM)$/,'').split(':').map(Number);
+  let h=q[0],m=q[1],s=q[2]||0;
+  if(ap){if(ap[1]==='PM'&&h<12)h+=12;if(ap[1]==='AM'&&h===12)h=0}
+  const d=new Date(c,month-1,day,h,m,s).getTime();
+  return Number.isFinite(d)?d:NaN;
+}
+
+/* =========================
+   MULTILINGUAL LEXICAL ENGINE
+   ========================= */
+const LANG_PATTERNS = {
+  Arabic:/[\u0600-\u06FF]/g,
+  Hebrew:/[\u0590-\u05FF]/g,
+  Russian:/[\u0400-\u04FF]/g,
+  English:/[A-Za-z]/g
+};
+/* Romance language clues are word-based because Italian/Spanish share the Latin alphabet. */
+const WORD_LANG = {
+  Italian:['ciao','grazie','amore','perché','perche','come','oggi','domani','buongiorno','buona','sono','sei','anche','con','non','dove','per'],
+  Spanish:['hola','gracias','amor','porque','cómo','como','hoy','mañana','buenos','buenas','soy','eres','también','con','no','donde','para'],
+  English:['the','you','and','what','this','that','are','with','have','not','for','can','just','your','love','today','tomorrow'],
+  Russian:['привет','спасибо','любовь','почему','сегодня','завтра','я','ты','это','как','что','очень','нет','да','где','буду'],
+  Hebrew:['שלום','תודה','אהבה','למה','היום','מחר','אני','אתה','את','זה','איך','מה','מאוד','לא','כן','איפה'],
+  Arabic:['مرحبا','شكرا','حب','لماذا','اليوم','غدا','بكرا','أنا','انا','أنت','انت','هذا','كيف','ماذا','جدا','لا','نعم','وين','أين']
+};
+function tokenize(text){
+  return text.toLowerCase().normalize('NFKC').match(/[\p{L}\p{N}’']+/gu)||[];
+}
+function detectLanguage(text){
+  const chars={};
+  for(const [k,re] of Object.entries(LANG_PATTERNS)) chars[k]=(text.match(re)||[]).length;
+  const toks=tokenize(text),wordScores={};
+  for(const [lang,words] of Object.entries(WORD_LANG)){
+    const set=new Set(words);
+    wordScores[lang]=toks.reduce((s,w)=>s+(set.has(w)?1:0),0);
+  }
+  let combined={
+    Arabic:chars.Arabic+wordScores.Arabic*6,
+    Hebrew:chars.Hebrew+wordScores.Hebrew*6,
+    Russian:chars.Russian+wordScores.Russian*6,
+    English:chars.English+wordScores.English*4,
+    Italian:wordScores.Italian*9,
+    Spanish:wordScores.Spanish*9
+  };
+  const top=Object.entries(combined).sort((a,b)=>b[1]-a[1]);
+  if(top[0][1]===0)return 'Unknown';
+  const second=top[1][1]||0;
+  if(second>=top[0][1]*.42)return 'Mixed';
+  return top[0][0];
+}
+
+const STOP = new Set([
+  'the','and','you','that','this','with','for','are','was','have','from','but','not','your','just','what','when','where','how','can','will','all','its','our',
+  'что','это','как','для','что','она','они','меня','тебя','сейчас','очень',
+  'אני','אתה','את','זה','מה','איך','היום','מחר','של','עם','לא','כן','אני','הוא','היא',
+  'من','في','على','هذا','هذه','انا','أنا','أنت','انت','هو','هي','ما','ماذا','كيف','مع','كان','كانت','الى','إلى','عن','لا','نعم','جدا','جداً',
+  'ciao','grazie','che','non','per','con','come','sono','sei','una','uno','del','della',
+  'hola','gracias','que','para','con','como','soy','eres','una','uno','del','las','los'
+]);
+function words(text){return tokenize(text)}
+function countWords(text){return words(text).filter(x=>x).length}
+function isQuestion(t){return /[?؟]/.test(t)}
+function getEmojis(t){return t.match(/\p{Extended_Pictographic}(?:\uFE0F|\u200D\p{Extended_Pictographic})*/gu)||[]}
+function mean(a){return a.length?a.reduce((x,y)=>x+y,0)/a.length:0}
+function pct(a,b){return b?(a/b)*100:0}
+function clamp(n,min=0,max=100){return Math.max(min,Math.min(max,n))}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function duration(ms){
+  if(!Number.isFinite(ms)||ms<0)return '—';
+  const total=Math.round(ms/60000),h=Math.floor(total/60),m=total%60;
+  if(total<1)return '<1m'; return h?`${h}h${m?` ${m}m`:''}`:`${m}m`;
+}
+function relDelta(a,b){return !a?(b?100:0):(b-a)/Math.abs(a)*100}
+function dateLabel(ts){return new Date(ts).toLocaleDateString(APP_LANG==='ar'?'ar':'en-US',{month:'short',day:'numeric',year:'numeric'})}
+
+/* More robust signal lexicons. */
+const POS=[
+ 'good','great','love','happy','amazing','nice','thanks','thank','glad','perfect','awesome','sweet','miss you',
+ 'حلو','جميل','ممتاز','رائع','أحب','احب','سعيد','شكرا','شكر','تمام','اشتقت','مشتاق',
+ 'מדהים','מעולה','תודה','שמח','אוהב','מתגעגע',
+ 'прекрасно','люблю','спасибо','скучаю','отлично',
+ 'amore','grazie','felice','adoro','mi manchi',
+ 'amor','gracias','feliz','te quiero','te extraño'
+];
+const NEG=[
+ 'bad','sad','angry','hate','sorry','problem','worried','upset','terrible','leave me','shut up','whatever',
+ 'سيء','حزين','زعلان','غاضب','كره','آسف','مشكلة','خايف','قلق','تعبان','خلص','اتركني','اسكت',
+ 'עצוב','כועס','שונא','בעיה','סליחה','מודאג','עזוב אותי','שתוק',
+ 'плохо','грустно','злюсь','ненавижу','проблема','извини','отстань','замолчи',
+ 'triste','arrabbiato','odio','problema','scusa','lasciami',
+ 'triste','enojado','odio','problema','perdón','déjame'
+];
+const CONFLICT=[
+ 'angry','mad','hate','problem','fight','fighting','argue','argument','annoying','annoyed','upset','leave me','shut up','whatever',
+ 'غاضب','معصب','زعلان','كره','مشكلة','شجار','نتخانق','خلاف','مزعج','اتركني','اسكت','خلص','بلا مزح',
+ 'כועס','ריב','מריבה','בעיה','מעצבן','תעזוב','שתוק','נמאס',
+ 'злюсь','ссора','ругаться','проблема','бесишь','отстань','замолчи','надоел',
+ 'litigare','arrabbiato','problema','fastidioso','lasciami',
+ 'pelea','enojado','problema','molesto','cállate','déjame'
+];
+const APOLOGY=[
+ 'sorry','apologize','forgive','آسف','سامحني','معلش','סליחה','מצטער','извини','прости','scusa','perdona','perdón'
+];
+const QUESTIONS=['why','what','when','where','how','هل','ماذا','لماذا','متى','وين','أين','למה','מה','מתי','איפה','почему','что','когда','где','perché','quando','dove','por qué','cuándo','dónde'];
+
+function includesLex(text,list){
+  const x=text.toLowerCase();return list.reduce((s,k)=>s+(x.includes(k.toLowerCase())?1:0),0)
+}
+function lexicalTone(messages){
+  let p=0,n=0,c=0,ap=0;
+  for(const m of messages){
+    p+=includesLex(m.text,POS);n+=includesLex(m.text,NEG);c+=includesLex(m.text,CONFLICT);ap+=includesLex(m.text,APOLOGY)
+  }
+  return {positive:p,negative:n,conflict:c,apology:ap,signalTotal:p+n}
+}
+function topWords(messages,limit=16){
+  const f={};
+  for(const m of messages)for(const w of words(m.text)){
+    if(w.length<3||STOP.has(w)||/^\d+$/.test(w))continue;
+    f[w]=(f[w]||0)+1;
+  }
+  return Object.entries(f).sort((a,b)=>b[1]-a[1]).slice(0,limit);
+}
+
+/* =========================
+   SESSION + TIMING ENGINE
+   ========================= */
+function chooseSessionGap(messages){
+  if(messages.length<6)return 45*60000;
+  const gaps=[];
+  for(let i=1;i<messages.length;i++){
+    const g=messages[i].ts-messages[i-1].ts;
+    if(g>0&&g<12*3600000)gaps.push(g)
+  }
+  if(!gaps.length)return 45*60000;
+  gaps.sort((a,b)=>a-b);
+  const p75=gaps[Math.floor(gaps.length*.75)];
+  return clamp(p75*3,20*60000,120*60000);
+}
+function buildSessions(messages){
+  const threshold=chooseSessionGap(messages),out=[];let cur=null;
+  for(const m of messages){
+    if(!cur){cur={start:m.ts,end:m.ts,messages:[m]}}
+    else if(m.ts-cur.end>threshold){out.push(cur);cur={start:m.ts,end:m.ts,messages:[m]}}
+    else{cur.messages.push(m);cur.end=m.ts}
+  }
+  if(cur)out.push(cur); return {sessions:out,threshold}
+}
+
+/* =========================
+   TOPIC MODEL
+   ========================= */
+const TOPICS={
+  'Love / Connection':['love','relationship','miss you','date','kiss','hug','أحب','حب','اشتقت','موعد','قبلة','عناق','אהבה','אוהב','מתגעגע','דייט','люблю','любовь','скучаю','свидание','amore','amore mio','mi manchi','appuntamento','amor','cita','te quiero','te extraño'],
+  'Work / Study':['work','office','meeting','project','job','exam','study','class','school','university','עבודה','משרד','פגישה','פרויקט','לימודים','אוניברסיטה','מבחן','جامعة','دراسة','امتحان','مشروع','شغل','دوام','работа','встреча','проект','экзамен','lavoro','ufficio','progetto','esame','trabajo','oficina','proyecto','examen'],
+  'Family':['family','mother','mom','father','dad','brother','sister','parent','משפחה','אמא','אבא','אח','אחות','عائلة','أمي','أبي','أخ','أخت','семья','мама','папа','брат','сестра','famiglia','mamma','papà','fratello','sorella','familia','madre','padre','hermano','hermana'],
+  'Travel':['travel','trip','flight','airport','hotel','vacation','passport','טיול','טיסה','שדה תעופה','מלון','חופשה','سفر','رحلة','مطار','فندق','إجازة','поездка','самолет','аэропорт','отель','отпуск','viaggio','aeroporto','hotel','vacanza','viaje','vuelo','aeropuerto','hotel','vacaciones'],
+  'Food':['food','eat','restaurant','dinner','lunch','coffee','pizza','אוכל','לאכול','מסעדה','ארוחה','קפה','פיצה','مطعم','أكل','اكل','غداء','عشاء','قهوة','بيتزا','еда','ресторан','ужин','кофе','пицца','cibo','mangiare','ristorante','cena','caffè','comida','restaurante','cena','café','pizza'],
+  'Plans':['tomorrow','today','tonight','later','weekend','plan','meet','מחר','היום','הלילה','תוכנית','פגישה','بكرا','غدا','اليوم','الليلة','خطة','موعد','завтра','сегодня','план','встретимся','domani','oggi','piano','vediamoci','mañana','hoy','plan','vernos'],
+  'Money':['money','price','pay','salary','cost','buy','purchase','כסף','מחיר','לשלם','משכורת','לקנות','سعر','فلوس','راتب','دفع','شراء','деньги','цена','зарплата','купить','деньги','цена','lavoro','stipendio','prezzo','comprare','dinero','precio','salario','comprar'],
+  'Fun / Social':['haha','lol','party','game','movie','music','fun','חחח','מסיבה','משחק','סרט','מוזיקה','ضحك','حفلة','لعبة','فيلم','موسيقى','смешно','вечеринка','игра','фильм','музыка','divertente','festa','gioco','film','musica','fiesta','juego','película','música']
+};
+function buildTopics(messages){
+  const scores={};Object.keys(TOPICS).forEach(k=>scores[k]=0);
+  for(const m of messages){
+    const x=m.text.toLowerCase();
+    for(const [topic,keys] of Object.entries(TOPICS)){
+      for(const k of keys){
+        const kk=k.toLowerCase();
+        if(x.includes(kk))scores[topic]++;
+      }
+    }
+  }
+  return Object.entries(scores).sort((a,b)=>b[1]-a[1]).slice(0,8);
+}
+
+/* =========================
+   EMOJI + CONFLICT RADAR
+   ========================= */
+function emojiStats(messages){
+  const f={};const bySender={};
+  for(const m of messages){
+    for(const e of getEmojis(m.text)){
+      f[e]=(f[e]||0)+1;
+      bySender[m.sender]??={};bySender[m.sender][e]=(bySender[m.sender][e]||0)+1;
+    }
+  }
+  return {top:Object.entries(f).sort((a,b)=>b[1]-a[1]).slice(0,12),bySender,total:Object.values(f).reduce((a,b)=>a+b,0)}
+}
+function conflictRadar(messages){
+  const windows=[];
+  if(!messages.length)return windows;
+  /* Rolling 8-message windows. A high friction score is a density signal. */
+  const win=Math.min(8,Math.max(4,Math.floor(messages.length/35)));
+  for(let i=0;i<=messages.length-win;i++){
+    const slice=messages.slice(i,i+win);
+    const raw=slice.reduce((s,m)=>s+includesLex(m.text,CONFLICT)+0.55*includesLex(m.text,NEG)+0.25*includesLex(m.text,APOLOGY),0);
+    const question=slice.filter(m=>isQuestion(m.text)).length;
+    const caps=slice.reduce((s,m)=>s+(m.text.replace(/[^A-ZА-Я]/g,'').length>Math.max(8,m.text.length*.15)?1:0),0);
+    const score=raw+question*.12+caps*.35;
+    if(score>=1.35){
+      windows.push({start:slice[0].ts,end:slice.at(-1).ts,score,count:slice.length,
+        peak:slice.reduce((a,m)=>{const q=includesLex(m.text,CONFLICT)+includesLex(m.text,NEG);return q>a.q?{q,s:m.sender,t:m.text}:a},{q:0})});
+    }
+  }
+  /* Non-max suppression: merge overlapping windows into conflict episodes. */
+  windows.sort((a,b)=>a.start-b.start);
+  const episodes=[];
+  for(const w of windows){
+    const last=episodes.at(-1);
+    if(last && w.start<=last.end+20*60000){
+      last.end=Math.max(last.end,w.end);last.score=Math.max(last.score,w.score);last.count+=w.count/2;
+      if(w.peak.q>last.peak.q)last.peak=w.peak;
+    }else episodes.push({...w});
+  }
+  return episodes.slice(-20);
+}
+
+/* =========================
+   RELATIONSHIP PATTERN ENGINE
+   ========================= */
+function relationshipPattern(r){
+  if(r.sorted.length<2)return {label:'Single speaker',detail:'Add a two-person or group conversation for reciprocity signals.',score:50};
+  const [a,b]=r.sorted;
+  const total=r.total;
+  const aShare=pct(a.messages,total), bShare=pct(b.messages,total);
+  const aStarts=pct(a.starts,Math.max(1,r.sessions.length)),bStarts=pct(b.starts,Math.max(1,r.sessions.length));
+  const aReply=mean(a.replies),bReply=mean(b.replies);
+  /* Symmetry: 100 means near-even, lower means one-sided observable behavior. */
+  const symmetry=clamp(100-Math.abs(aShare-bShare)*1.35);
+  const startSym=clamp(100-Math.abs(aStarts-bStarts)*1.2);
+  const timingSym=(aReply&&bReply)?clamp(100-(Math.abs(aReply-bReply)/Math.max(aReply,bReply))*100):55;
+  const questionSpread=clamp(100-Math.abs(a.questions-b.questions)/Math.max(1,a.questions+b.questions)*100);
+  const score=Math.round(.32*symmetry+.28*startSym+.22*timingSym+.18*questionSpread);
+
+  let label='Balanced / reciprocal';
+  let detail='Both sides contribute measurable conversation energy.';
+  if(score<46){label='Uneven / asymmetric';detail='One side contributes much more of the observable conversation flow.'}
+  else if(score<65){label='Mostly reciprocal';detail='The pattern is usable, but some behaviors are noticeably uneven.'}
+  return {label,detail,score,a,b,symmetry,startSym,timingSym,questionSpread}
+}
+
+/* =========================
+   TREND DATA
+   ========================= */
+function trendSeries(messages,buckets=14){
+  if(messages.length<2)return [];
+  const min=messages[0].ts,max=messages.at(-1).ts,span=Math.max(1,max-min),step=span/buckets;
+  const out=[];
+  for(let i=0;i<buckets;i++){
+    const lo=min+i*step,hi=i===buckets-1?max+1:lo+step;
+    const ms=messages.filter(m=>m.ts>=lo&&m.ts<hi);
+    const cross=ms.filter(m=>Number.isFinite(m.replyMs));
+    out.push({
+      label:new Date(lo).toLocaleDateString('en-US',{month:'short',day:'numeric'}),
+      volume:ms.length,
+      avgReply:cross.length?mean(cross.map(m=>m.replyMs))/60000:null,
+      avgWords:ms.length?mean(ms.map(m=>m.words)):0,
+      conflict:ms.reduce((s,m)=>s+includesLex(m.text,CONFLICT)+.5*includesLex(m.text,NEG),0),
+      positive:ms.reduce((s,m)=>s+includesLex(m.text,POS),0)
+    })
+  }
+  return out;
+}
+
+/* =========================
+   ANALYSIS
+   ========================= */
+function analyze(raw){
+  const base=parseMessages(raw).filter(m=>m.sender&&m.text);
+  if(!base.length){fail('No readable WhatsApp messages were found.');return}
+  const messages=base.map((m,i)=>({...m,index:i,ts:parseDate(m.date,m.time)})).filter(m=>Number.isFinite(m.ts));
+  if(!messages.length){fail('Messages were found, but their dates could not be parsed safely.');return}
+
+  for(const m of messages)m.words=countWords(m.text);
+
+  const names=[...new Set(messages.map(m=>m.sender))];
+  const by={};names.forEach(n=>by[n]={messages:0,words:0,questions:0,starts:0,replies:[],positive:0,negative:0});
+  const replyTimes=[];
+  for(let i=0;i<messages.length;i++){
+    const m=messages[i];by[m.sender].messages++;by[m.sender].words+=m.words;
+    by[m.sender].questions += isQuestion(m.text)?1:0;
+    by[m.sender].positive += includesLex(m.text,POS);
+    by[m.sender].negative += includesLex(m.text,NEG);
+    if(i){
+      const prev=messages[i-1],gap=m.ts-prev.ts;
+      if(prev.sender!==m.sender&&gap>=0&&gap<=24*3600000){
+        m.replyMs=gap;by[m.sender].replies.push(gap);replyTimes.push(gap);
+      }
+    }
+  }
+  const sb=buildSessions(messages),sessions=sb.sessions;
+  sessions.forEach(s=>by[s.messages[0].sender].starts++);
+
+  const total=messages.length,totalWords=messages.reduce((a,m)=>a+m.words,0);
+  const sorted=names.map(n=>({sender:n,...by[n]})).sort((a,b)=>b.messages-a.messages);
+  const langs={Arabic:0,English:0,Hebrew:0,Russian:0,Italian:0,Spanish:0,Mixed:0,Unknown:0};
+  messages.forEach(m=>langs[detectLanguage(m.text)]++);
+  const dominant=Object.entries(langs).sort((a,b)=>b[1]-a[1])[0][0];
+
+  const tone=lexicalTone(messages);
+  const emojis=emojiStats(messages);
+  const conflicts=conflictRadar(messages);
+  const topics=buildTopics(messages);
+  const trend=trendSeries(messages);
+  const relation=relationshipPattern({total,sorted,sessions,...{}});
+
+  const avgLen=totalWords/Math.max(1,total);
+  const depth=clamp(32+Math.min(45,avgLen*2.2)+Math.min(23,mean(sessions.map(s=>s.messages.length))*1.15));
+  const participation=sorted.length>1?clamp(100-Math.abs(pct(sorted[0].messages,total)-50)*1.65):100;
+  const initiation=sorted.length>1?clamp(100-Math.abs(pct(sorted[0].starts,Math.max(1,sessions.length))-50)*1.55):100;
+  const replyScore=replyTimes.length?clamp(108-Math.log1p(mean(replyTimes)/60000)*20):58;
+  const conflictPenalty=clamp(conflicts.length*2.5,0,18);
+  const pulse=Math.round(clamp(.25*participation+.22*initiation+.25*replyScore+.20*depth+.08*(100-conflictPenalty)));
+  const coverage=clamp(52+Math.min(23,replyTimes.length/Math.max(1,total)*100)+Math.min(25,names.length*5));
+
+  const result={messages,total,totalWords,names,by,sorted,sessions,sessionGap:sb.threshold,replyTimes,dominant,langs,tone,emojis,conflicts,topics,trend,relation,depth,participation,initiation,replyScore,pulse,coverage,topWords:topWords(messages)};
+  LAST=result; render(result);
+  $('dashboard').style.display='block';
+  $('status').textContent=`✓ Analyzed ${total.toLocaleString()} messages across ${names.length} participants`;
+}
+
+function render(r){
+  $('totalMsgs').textContent=r.total.toLocaleString();
+  $('totalWords').textContent=r.totalWords.toLocaleString();
+  $('sessionCount').textContent=r.sessions.length.toLocaleString();
+  $('avgReply').textContent=r.replyTimes.length?duration(mean(r.replyTimes)):'—';
+  $('language').textContent=r.dominant;
+  $('confidence').textContent=Math.round(r.coverage)+'%';
+  $('confidenceBig').textContent=Math.round(r.coverage)+'%';
+  renderPulse(r);renderBalance(r);renderParticipants(r);renderLanguages(r);renderTone(r);
+  renderInsights(r);renderTopics(r);renderEmoji(r);renderConflict(r);renderTrends(r);renderSessions(r);renderRecent(r);renderStory(r);
+  drawCharts(r);
+}
+
+/* =========================
+   UI RENDERING
+   ========================= */
+function renderPulse(r){
+  const deg=r.pulse*3.6;
+  $('score').style.background=`conic-gradient(var(--cyan) 0deg,var(--green) ${deg}deg,#172333 ${deg}deg 360deg)`;
+  $('pulse').textContent=r.pulse;
+  const labels=[
+    ['Participation balance',r.participation],
+    ['Initiation balance',r.initiation],
+    ['Responsiveness',r.replyScore],
+    ['Conversation depth',r.depth],
+    ['Relationship reciprocity',r.relation.score]
+  ];
+  $('meters').innerHTML=labels.map(([n,v])=>`<div><div class="meterhead"><span>${n}</span><b>${Math.round(v)}/100</b></div><div class="track"><div class="fill" style="width:${clamp(v)}%"></div></div></div>`).join('');
+}
+function renderBalance(r){
+  const top=r.sorted.slice(0,8), rel=r.relation;
+  const intro=`<div class="insight"><div class="tag2">PATTERN</div><p><b>${esc(rel.label)}</b> — ${rel.detail}</p><small>What this means: it describes measurable conversation behavior, not feelings or intentions.</small></div>`;
+  const rows=top.map(s=>{
+    const share=Math.round(pct(s.messages,r.total)),start=Math.round(pct(s.starts,Math.max(1,r.sessions.length)));
+    return `<div class="row"><div class="rowmain"><div class="title">${esc(s.sender)}</div>
+    <div class="subtxt">${start}% of session starts · ${s.questions} questions · avg reply ${s.replies.length?duration(mean(s.replies)):'—'}</div></div><strong class="cyan">${share}%</strong></div>`
+  }).join('');
+  $('balance').innerHTML=intro+rows;
+}
+function renderParticipants(r){
+  $('participants').innerHTML=r.sorted.map(s=>{
+    const share=Math.round(pct(s.messages,r.total));
+    return `<div><div class="barline"><span class="barlabel">${esc(s.sender)}</span><div class="track"><div class="fill" style="width:${share}%"></div></div><b>${share}%</b></div><div class="subtxt">${s.messages} messages · ${s.questions} questions · ${s.starts} starts</div></div>`;
+  }).join('');
+}
+function renderLanguages(r){
+  const items=Object.entries(r.langs).filter(x=>x[1]).sort((a,b)=>b[1]-a[1]);
+  $('languageDNA').innerHTML=items.map(([k,v])=>`<div class="signal"><strong>${k}</strong><span>${Math.round(pct(v,r.total))}% of messages</span></div>`).join('');
+}
+function renderTone(r){
+  const items=[
+    ['Positive signals',r.tone.positive,'green','Words associated with warmth/approval'],
+    ['Conflict signals',r.tone.conflict,'red','Words associated with friction'],
+    ['Apology signals',r.tone.apology,'gold','Words associated with repair/softening'],
+    ['Top repeated words',r.topWords.slice(0,4).map(x=>x[0]).join(', ')||'—','cyan','Frequent content words']
+  ];
+  $('tone').innerHTML=items.map(x=>`<div class="signal"><strong class="${x[2]}">${esc(String(x[1]))}</strong><span>${esc(x[0])} · ${esc(x[3])}</span></div>`).join('');
+}
+function renderInsights(r){
+  const list=[];
+  const rel=r.relation;
+  list.push(['RELATIONSHIP PATTERN',
+    `<b>${esc(rel.label)}</b> (${rel.score}/100). ${esc(rel.detail)}`,
+    'Meaning: higher score = more even observable participation, starting and response behavior.']);
+  if(r.sorted.length>1){
+    const [a,b]=r.sorted;
+    const lead=Math.round(pct(a.messages,r.total)-pct(b.messages,r.total));
+    list.push(['INITIATOR',
+      `<b>${esc(a.sender)}</b> starts ${a.starts} sessions vs ${b.starts} for ${esc(b.sender)}.`,
+      lead>15?'Meaning: the conversation flow is visibly initiated more often by one side.':'Meaning: starting behavior is relatively shared.']);
+  }
+  if(r.conflicts.length){
+    const c=r.conflicts.at(-1);
+    list.push(['FRICTION WINDOW',
+      `${r.conflicts.length} friction episode${r.conflicts.length>1?'s':''} detected. The latest peaks around <b>${esc(c.peak.s||'multiple senders')}</b>.`,
+      'Meaning: message language became more conflict-heavy in a local time window; this is not proof of an argument.']);
+  }else{
+    list.push(['FRICTION',
+      'No strong conflict cluster crossed the current local threshold.',
+      'Meaning: the detector did not find a concentrated spike in friction markers.']);
+  }
+  if(r.replyTimes.length){
+    list.push(['RESPONSE',
+      `Average cross-sender response interval: <b>${duration(mean(r.replyTimes))}</b>.`,
+      'Meaning: direct response timing is estimated only when another participant replies within 24 hours.']);
+  }
+  $('insights').innerHTML=list.slice(0,5).map(x=>`<div class="insight"><div class="tag2">${x[0]}</div><p>${x[1]}</p><small>${x[2]}</small></div>`).join('');
+}
+function renderTopics(r){
+  const arr=r.topics;
+  const max=arr[0]?.[1]||1;
+  $('topics').innerHTML=arr.length?arr.map(([k,v])=>`<div class="topic"><span>${esc(k)}</span><div class="track"><div class="fill" style="width:${Math.round(v/max*100)}%"></div></div><b>${v}</b></div>`).join('')
+  :'<div class="subtxt">Not enough lexical evidence for a topic signal.</div>';
+}
+function renderEmoji(r){
+  $('emojiWrap').innerHTML=r.emojis.top.length?r.emojis.top.slice(0,10).map(([e,n])=>`<div class="emoji"><span>${e}</span><b>${n}</b></div>`).join(''):'<div class="subtxt">No emojis detected.</div>';
+}
+function renderConflict(r){
+  if(!r.conflicts.length){
+    $('conflictSummary').innerHTML='<div class="story"><h3 class="green">Low friction signal</h3><p>The detector found no concentrated conflict cluster above the current threshold. This does not mean there were no disagreements; it means the lexical/timing signal was not strong enough.</p></div>';
+  }else{
+    const latest=r.conflicts.at(-1),peak=r.conflicts.reduce((a,b)=>b.score>a.score?b:a);
+    $('conflictSummary').innerHTML=`<div class="signalgrid">
+      <div class="signal"><strong class="red">${r.conflicts.length}</strong><span>detected friction episodes</span></div>
+      <div class="signal"><strong class="orange">${new Date(latest.start).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</strong><span>latest episode</span></div>
+      <div class="signal"><strong>${peak.peak.s||'—'}</strong><span>highest single-message friction signal</span></div>
+      <div class="signal"><strong>${peak.score.toFixed(1)}</strong><span>peak cluster score</span></div>
+    </div>`;
+  }
+}
+function renderTrends(r){
+  const n=Math.max(10,Math.floor(r.total*.2));
+  const a=r.messages.slice(0,n),b=r.messages.slice(-n);
+  const avgReplyA=mean(a.map(m=>m.replyMs).filter(Number.isFinite))/60000;
+  const avgReplyB=mean(b.map(m=>m.replyMs).filter(Number.isFinite))/60000;
+  const metrics=[
+    ['Message length',mean(a.map(x=>x.words)),mean(b.map(x=>x.words)),'words'],
+    ['Question rate',pct(a.filter(x=>isQuestion(x.text)).length,a.length),pct(b.filter(x=>isQuestion(x.text)).length),'%'],
+    ['Reply time',avgReplyA||0,avgReplyB||0,'min']
+  ];
+  $('trends').innerHTML=metrics.map(([name,x,y,u])=>{
+    const d=relDelta(x,y),cls=Math.abs(d)<5?'gold':d>0?'green':'red';
+    return `<div class="signal"><strong>${x.toFixed(1)} → ${y.toFixed(1)} ${u}</strong><span>${name} · <b class="${cls}">${d>=0?'+':''}${d.toFixed(0)}%</b> from early to recent</span></div>`
+  }).join('');
+}
+function renderSessions(r){
+  $('sessions').innerHTML=r.sessions.slice(-10).reverse().map((s,i)=>{
+    const people=new Set(s.messages.map(m=>m.sender)).size;
+    return `<div class="row"><div class="rowmain"><div class="title">Session ${r.sessions.length-i}</div>
+    <div class="subtxt">${dateLabel(s.start)} · ${s.messages.length} messages · ${people} participants</div></div>
+    <strong class="violet">${duration(s.end-s.start)}</strong></div>`
+  }).join('');
+}
+function renderRecent(r){
+  $('recent').innerHTML=r.messages.slice(-25).reverse().map(m=>`<tr>
+  <td style="padding:9px;border-bottom:1px solid #182534">${esc(m.date)}<br><span class="muted">${esc(m.time)}</span></td>
+  <td style="padding:9px;border-bottom:1px solid #182534">${esc(m.sender)}</td>
+  <td style="padding:9px;border-bottom:1px solid #182534;max-width:470px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(m.text.replace(/\n/g,' '))}</td>
+  <td style="padding:9px;border-bottom:1px solid #182534">${duration(m.replyMs)}</td>
+  <td style="padding:9px;border-bottom:1px solid #182534">${m.words}</td></tr>`).join('');
+}
+function renderStory(r){
+  const rel=r.relation;
+  const topTopic=r.topics[0]?.[0]||'general conversation';
+  const conflict=r.conflicts.length?` There are ${r.conflicts.length} localized friction episode(s), so the conversation has visible moments of higher tension.`:
+  ` No concentrated friction spike crossed the current detector threshold.`;
+  const text=`The conversation is ${rel.label.toLowerCase()} based on observable participation, session starts and response timing. The strongest topic signal is ${topTopic}. ${r.sorted[0]||{sender:'One participant'} .sender} contributes ${Math.round(pct(r.sorted[0]?.messages||0,r.total))}% of messages.${conflict}`;
+  $('story').innerHTML=`<h3>${esc('Your conversation at a glance')}</h3><p>${esc(text)}</p>`;
+}
+
+/* =========================
+   CHARTS
+   ========================= */
+function destroyCharts(){Object.values(charts).forEach(c=>{try{c.destroy()}catch(_){}});charts={}}
+const chartOpts={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+scales:{x:{grid:{display:false},ticks:{color:'#7c90a5',font:{size:9}}},
+y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#7c90a5',font:{size:9}}}}};
+function drawCharts(r){
+  if(!window.Chart)return;
+  destroyCharts();
+  const names=r.sorted.map(x=>x.sender).slice(0,6);
+  const start=names.map(n=>r.by[n].starts),reply=names.map(n=>r.by[n].replies.length);
+  charts.init=new Chart($('initChart'),{type:'bar',data:{labels:names,datasets:[
+    {label:'Session starts',data:start,backgroundColor:'rgba(79,216,255,.70)',borderRadius:7},
+    {label:'Direct replies',data:reply,backgroundColor:'rgba(167,139,250,.65)',borderRadius:7}
+  ]},options:{...chartOpts,plugins:{legend:{display:true,labels:{color:'#a7b6c6',font:{size:9}}}}}});
+
+  const t=r.trend;
+  charts.energy=new Chart($('energyChart'),{type:'line',data:{labels:t.map(x=>x.label),datasets:[
+    {label:'Messages',data:t.map(x=>x.volume),borderColor:'#4fd8ff',backgroundColor:'rgba(79,216,255,.08)',fill:true,tension:.35,pointRadius:2}
+  ]},options:chartOpts});
+
+  charts.emoji=new Chart($('emojiChart'),{type:'doughnut',data:{labels:r.emojis.top.slice(0,7).map(x=>x[0]),datasets:[{
+    data:r.emojis.top.slice(0,7).map(x=>x[1]),backgroundColor:['#4fd8ff','#a78bfa','#31e891','#ffc857','#ff6685','#ff995a','#5b7cff'],borderWidth:0
+  }]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#a7b6c6',font:{size:9}}}}}});
+
+  charts.conflict=new Chart($('conflictChart'),{type:'line',data:{labels:t.map(x=>x.label),datasets:[
+    {label:'Friction markers',data:t.map(x=>x.conflict),borderColor:'#ff6685',backgroundColor:'rgba(255,102,133,.10)',fill:true,tension:.35,pointRadius:2}
+  ]},options:chartOpts});
+
+  charts.trend=new Chart($('trendChart'),{type:'line',data:{labels:t.map(x=>x.label),datasets:[
+    {label:'Avg words',data:t.map(x=>x.avgWords),borderColor:'#4fd8ff',tension:.35,pointRadius:2},
+    {label:'Reply time (min)',data:t.map(x=>x.avgReply),borderColor:'#a78bfa',tension:.35,pointRadius:2},
+    {label:'Positive signals',data:t.map(x=>x.positive),borderColor:'#31e891',tension:.35,pointRadius:2}
+  ]},options:{...chartOpts,plugins:{legend:{display:true,labels:{color:'#a7b6c6',font:{size:9}}}}}});
+}
+
+/* =========================
+   NEURAL NLP
+   =========================
+   This is intentionally lazy-loaded. Basic analysis works without it.
+   The model is multilingual and used for semantic similarity / topic evidence.
+*/
+async function loadNeural(){
+  if(NEURAL)return NEURAL;
+  if(NEURAL_LOADING)return null;
+  NEURAL_LOADING=true;
+  $('semanticBtn').textContent='Loading multilingual model…';
+  $('status').textContent='Loading Neural NLP model. The first load can be large.';
+  try{
+    const mod=await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.2/dist/transformers.min.js');
+    const {pipeline}=mod;
+    const extractor=await pipeline('feature-extraction','Xenova/paraphrase-multilingual-MiniLM-L12-v2',{dtype:'q8'});
+    NEURAL=extractor;
+    $('semanticBtn').textContent='Neural NLP enabled ✓';
+    $('status').textContent='✓ Multilingual semantic model is ready.';
+    if(LAST)await applySemantic(LAST);
+    return NEURAL;
+  }catch(err){
+    console.error(err);
+    $('semanticBtn').textContent='Enable Neural NLP';
+    $('status').textContent='Neural NLP could not load. The local lexical engine remains active.';
+    return null;
+  }finally{NEURAL_LOADING=false}
+}
+async function embedding(texts){
+  if(!NEURAL)return [];
+  const out=await NEURAL(texts,{pooling:'mean',normalize:true});
+  return out.tolist();
+}
+function cosine(a,b){
+  let dot=0,na=0,nb=0;for(let i=0;i<a.length;i++){dot+=a[i]*b[i];na+=a[i]*a[i];nb+=b[i]*b[i]}
+  return dot/(Math.sqrt(na)*Math.sqrt(nb)||1);
+}
+async function applySemantic(r){
+  if(!NEURAL)return;
+  try{
+    const sample=r.messages.slice(0,Math.min(80,r.messages.length));
+    const seedTexts=Object.entries(TOPICS).map(([k,v])=>`${k}: ${v.slice(0,10).join(', ')}`);
+    const em=await embedding(sample.map(m=>m.text));
+    const seed=await embedding(seedTexts);
+    const scores=Object.fromEntries(Object.keys(TOPICS).map(k=>[k,0]));
+    for(let i=0;i<sample.length;i++){
+      let best=0;
+      for(let j=0;j<seed.length;j++){
+        scores[Object.keys(TOPICS)[j]]+=Math.max(0,cosine(em[i],seed[j]));
+        best=Math.max(best,cosine(em[i],seed[j]));
+      }
+    }
+    const sem=Object.entries(scores).sort((a,b)=>b[1]-a[1]).slice(0,8);
+    r.semanticTopics=sem;
+    $('topics').innerHTML=sem.map(([k,v])=>`<div class="topic"><span>${esc(k)}</span><div class="track"><div class="fill" style="width:${Math.min(100,Math.round(v/Math.max(...sem.map(x=>x[1]))*100))}%"></div></div><b>${v.toFixed(1)}</b></div>`).join('');
+    $('status').textContent='✓ Neural NLP has re-ranked topics semantically across languages.';
+  }catch(err){
+    console.error(err);
+    $('status').textContent='Neural NLP was partially available; lexical results remain shown.';
+  }
+}
+$('semanticBtn').onclick=loadNeural;
+
+/* =========================
+   PRO / AI / STRIPE HOOKS
+   ========================= */
+function toast(msg){
+  $('toast').textContent=msg;$('toast').style.display='block';
+  setTimeout(()=>$('toast').style.display='none',4500)
+}
+$('proBtn').onclick=()=>$('proModal').style.display='grid';
+$('closeModal').onclick=()=>$('proModal').style.display='none';
+$('cancelPro').onclick=()=>$('proModal').style.display='none';
+$('proModal').addEventListener('click',e=>{if(e.target===$('proModal'))$('proModal').style.display='none'});
+
+/*
+  SECURITY:
+  This browser code should call YOUR server.
+  Example:
+    POST /api/create-checkout-session
+    body: { plan: "pro_monthly" }
+
+  Server returns:
+    { url: "https://checkout.stripe.com/..." }
+
+  The browser redirects there.
+*/
+$('checkoutBtn').onclick=async()=>{
+  try{
+    $('checkoutBtn').disabled=true;
+    $('checkoutBtn').textContent='Opening secure checkout…';
+    const res=await fetch('/api/create-checkout-session',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({plan:'pro_monthly'})
+    });
+    if(!res.ok)throw new Error('Checkout endpoint unavailable');
+    const data=await res.json();
+    if(!data.url)throw new Error('No checkout URL returned');
+    window.location.href=data.url;
+  }catch(err){
+    console.error(err);
+    toast('Secure checkout is not connected yet. Add the backend endpoint /api/create-checkout-session.');
+    $('checkoutBtn').disabled=false;
+    $('checkoutBtn').textContent='Continue to secure checkout';
+  }
+};
+
+/*
+  Pro AI story:
+  Send only the FEATURES, not the whole chat, when practical.
+  This keeps privacy better and makes requests much smaller.
+
+  Expected backend:
+    POST /api/ai-insights
+    body: {
+      metrics: {
+        pulse, relation, topics, conflictCount, avgReply, languages, trends
+      }
+    }
+    response: { story: "..." }
+*/
+$('aiBtn').onclick=async()=>{
+  if(!LAST){toast('Analyze a conversation first.');return}
+  try{
+    $('aiBtn').disabled=true;$('aiBtn').textContent='Generating…';
+    const payload={
+      metrics:{
+        pulse:LAST.pulse,
+        relationshipPattern:LAST.relation,
+        topTopics:(LAST.semanticTopics||LAST.topics).slice(0,5),
+        conflictCount:LAST.conflicts.length,
+        avgReplyMs:LAST.replyTimes.length?mean(LAST.replyTimes):null,
+        languages:LAST.langs,
+        trend:LAST.trend.slice(-8)
+      }
+    };
+    const res=await fetch('/api/ai-insights',{
+      method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)
+    });
+    if(!res.ok)throw new Error('AI endpoint unavailable');
+    const data=await res.json();
+    $('story').innerHTML=`<h3>AI Story</h3><p>${esc(data.story||'No story returned.')}</p>`;
+  }catch(err){
+    console.error(err);
+    toast('AI Story needs your secure backend at /api/ai-insights.');
+  }finally{
+    $('aiBtn').disabled=false;$('aiBtn').innerHTML='Generate AI Story <span style="color:#d8bdff">PRO</span>';
+  }
+};
+
+function fail(msg){$('error').textContent=msg;$('error').style.display='block';$('status').textContent=''}
+applyLang();
+</script>
+</body>
+</html>
