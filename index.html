@@ -1,7 +1,8 @@
 <!doctype html>
 <html lang="en" dir="ltr">
 <head>
-  <meta name="google-site-verification" content="4j5ULNTNE2ixVPpcLIiCN8Q4c06Ce2WU94GCSvMtyeU" />
+      <meta name="google-site-verification" content="4j5ULNTNE2ixVPpcLIiCN8Q4c06Ce2WU94GCSvMtyeU" />
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#070b14">
@@ -193,7 +194,30 @@ width:min(560px,100%);border:1px solid #33465d;background:#09111c;border-radius:
 @media(max-width:500px){.app{padding:11px}.hero{padding-top:40px}.hero p{font-size:15px}
 .cards{grid-template-columns:1fr 1fr}.toolbar .pill{display:none}.chartbox{height:220px}
 }
+
+/* ===== SOCIAL RANKING + REACTIONS ===== */
+.reaction-import{display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px}
+.reaction-import span{font-size:9px;color:#71869a}
+.reaction-btn{color:#f1dff0!important;border-color:#56385a!important;background:#140e17!important}
+.social-panel{margin-top:18px}
+.social-hero{display:grid;grid-template-columns:1.15fr .85fr;gap:12px}
+.rank-list{display:grid;gap:8px}
+.rank-item{display:grid;grid-template-columns:42px 1fr 66px;gap:11px;align-items:center;padding:11px;border:1px solid var(--line);border-radius:13px;background:#09131e}
+.rank-pos{font:900 15px ui-monospace,SFMono-Regular,monospace;color:#6f8398;text-align:center}
+.rank-main{min-width:0}.rank-title{font-size:11px;font-weight:850;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank-meta{font-size:9px;color:#71869a;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank-score{font:900 12px ui-monospace,SFMono-Regular,monospace;text-align:right;color:var(--cyan)}
+.rank-meter{height:5px;background:#172433;border-radius:99px;overflow:hidden;margin-top:6px}.rank-meter i{display:block;height:100%;background:linear-gradient(90deg,var(--cyan),var(--violet));border-radius:99px}
+.reaction-message{padding:12px;border:1px solid var(--line);border-radius:13px;background:#09131e;margin-top:8px}
+.reaction-message-top{display:flex;justify-content:space-between;gap:10px;align-items:center}.reaction-count{font:900 10px ui-monospace,SFMono-Regular,monospace;color:#ff9bd2}
+.reaction-pills{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}.reaction-pill{font-size:13px;padding:4px 6px;border-radius:8px;background:#111d2b;border:1px solid #213449}
+.open-vocab{display:grid;grid-template-columns:1fr 1fr;gap:9px}.emotion-card{padding:12px;border:1px solid var(--line);border-radius:12px;background:#09131e}
+.emotion-top{display:flex;justify-content:space-between;gap:8px;font-size:10px}.emotion-score{font:900 10px ui-monospace,SFMono-Regular,monospace;color:var(--violet)}
+.emotion-bar{height:6px;background:#172433;border-radius:99px;overflow:hidden;margin-top:8px}.emotion-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--violet),var(--cyan))}
+.rank-disclaimer{font-size:9px;line-height:1.55;color:#71869a;margin-top:9px}
+@media(max-width:850px){.social-hero{grid-template-columns:1fr}.open-vocab{grid-template-columns:1fr}}
 </style>
+<!-- Ranking design informed by publicly described Instagram ranking signals; not proprietary code. -->
 </head>
 
 <body>
@@ -224,12 +248,17 @@ width:min(560px,100%);border:1px solid #33465d;background:#09111c;border-radius:
   <div class="uploadin">
     <div class="uploadico">◈</div>
     <label class="btn" id="uploadBtn" for="file">Analyze WhatsApp export</label>
-    <input id="file" type="file" accept=".txt,text/plain">
+    <input id="file" type="file" accept=".txt,text/plain,.json,application/json" id="file">
     <h3 id="fileName">Drop your .txt conversation here</h3>
     <p id="uploadHint">
       The core analysis runs locally in your browser. Neural semantic analysis is loaded only when requested.
       Your chat is not sent anywhere by the basic analyzer.
     </p>
+    <div class="reaction-import" id="reactionImportBox">
+      <label class="tinybtn reaction-btn" for="reactionFile">💗 Import message reactions</label>
+      <input id="reactionFile" type="file" accept=".json,application/json,.txt,text/plain">
+      <span id="reactionStatus">Optional — reactions are read from a separate data source.</span>
+    </div>
     <span class="privacy">🔒 Privacy-first core analysis</span>
   </div>
 </section>
@@ -262,6 +291,25 @@ width:min(560px,100%);border:1px solid #33465d;background:#09111c;border-radius:
   </div>
 </section>
 
+
+<section class="section social-panel panel">
+  <div class="head">
+    <div><h2>Social Signal Engine</h2><p class="sub">Instagram-inspired ranking principles adapted to conversations — recency, interaction strength, affinity and action signals.</p></div>
+    <span class="pill">OPEN-VOCABULARY</span>
+  </div>
+  <div class="social-hero">
+    <div>
+      <div class="rank-list" id="socialRankList"></div>
+      <div class="rank-disclaimer">This is not Instagram's proprietary code. It uses publicly described ranking ideas: separate signal prediction, recency, interaction history and action strength, adapted to chat behavior rather than content feeds. Instagram has publicly described separate ranking systems and has highlighted actions such as watch time, likes and sends; this product does not claim to reproduce their hidden weights. citeturn913194search1turn913194search5</div>
+    </div>
+    <div>
+      <div class="eyebrow">MESSAGE REACTION INTELLIGENCE</div>
+      <div id="reactionInsight" class="story" style="margin-top:8px"><h3>No reaction layer loaded</h3><p>Import a reaction dataset when you have one. Standard WhatsApp .txt exports do not include message reactions.</p></div>
+      <div class="eyebrow" style="margin-top:14px">OPEN-VOCABULARY FEELING SIGNALS</div>
+      <div class="open-vocab" id="openVocabGrid" style="margin-top:8px"></div>
+    </div>
+  </div>
+</section>
 <section class="section grid2">
   <div class="panel">
     <div class="head"><div><h2>Who drives the conversation?</h2><p class="sub">Observable initiation + response behavior.</p></div></div>
@@ -406,6 +454,8 @@ let LAST = null;
 let charts = {};
 let NEURAL = null;
 let NEURAL_LOADING = false;
+let REACTION_DATA = [];
+let EMOTION_SEMANTIC = null;
 
 const I18N = {
   en:{
@@ -438,11 +488,94 @@ $('langBtn').onclick=()=>{APP_LANG=APP_LANG==='en'?'ar':'en';applyLang()};
    ========================= */
 const drop = $('dropZone'), file = $('file');
 file.addEventListener('change',e=>e.target.files[0]&&loadFile(e.target.files[0]));
+$('reactionFile')?.addEventListener('change',e=>e.target.files[0]&&loadReactionFile(e.target.files[0]));
+function loadReactionFile(f){
+  const r=new FileReader();
+  r.onload=e=>{
+    try{
+      const raw=e.target.result;
+      let data;
+      if(/\.json$/i.test(f.name)) data=JSON.parse(raw);
+      else data=parseReactionLines(raw);
+      REACTION_DATA=normalizeReactionData(data);
+      if(!REACTION_DATA.length) throw new Error('No reaction records found');
+      if(LAST){attachReactions(LAST);render(LAST)}
+      $('reactionStatus').textContent=`✓ ${REACTION_DATA.length} message reactions loaded`;
+    }catch(err){console.error(err);$('reactionStatus').textContent='Could not read reaction data.'}
+  };
+  r.readAsText(f,'UTF-8');
+}
+function parseReactionLines(text){
+  const out=[];
+  for(const line of normalize(text).split('\n')){
+    /* Flexible custom line formats: message index | reactor | emoji | timestamp */
+    const m=line.match(/^\s*(\d+)\s*[|,]\s*(.*?)\s*[|,]\s*(\p{Extended_Pictographic}+(?:️)?)\s*(?:[|,]\s*(.*))?$/u);
+    if(m) out.push({messageIndex:Number(m[1]),reactor:m[2],emoji:m[3],timestamp:m[4]||null});
+  }
+  return out;
+}
+function normalizeReactionData(data){
+  let arr=Array.isArray(data)?data:(data?.reactions||data?.messages||[]);
+  const out=[];
+  const walk=(item)=>{
+    if(!item||typeof item!=='object')return;
+    if(item.emoji||item.reactionText){
+      out.push({
+        messageIndex:Number.isFinite(Number(item.messageIndex))?Number(item.messageIndex):null,
+        messageId:item.messageId||item.msgId||item.targetMessageId||item.message_id||null,
+        reactor:item.reactor||item.sender||item.senderName||item.from||item.senderUserJid||'Unknown',
+        emoji:item.emoji||item.reactionText||'',
+        timestamp:item.timestamp||null,
+        messageText:item.messageText||item.targetText||item.originalText||null,
+        targetDate:item.targetDate||item.date||null,
+        targetTime:item.targetTime||item.time||null
+      });
+    }
+    if(Array.isArray(item.senders)) item.senders.forEach(x=>walk({...x,emoji:x.reactionText||item.aggregateEmoji||x.emoji,messageId:x.msgId||item.msgId||item.messageId}));
+    if(Array.isArray(item.reactions)) item.reactions.forEach(walk);
+  };
+  arr.forEach(walk);
+  return out.filter(x=>x.emoji);
+}
+function reactionWeight(e){
+  const x=e||'';
+  if(/❤️|♥️|💖|💗|💓|💞|💕|💘|💝|😍|🥰/.test(x))return 1.7;
+  if(/😂|🤣|😹/.test(x))return 1.35;
+  if(/👍|👌|👏|🙏|✅/.test(x))return 1.0;
+  if(/🔥|💯|😎|🤩/.test(x))return 1.45;
+  if(/😮|😲|🤯|😢|😭|😡|🤬|👎/.test(x))return .75;
+  return 1.0;
+}
+function attachReactions(r){
+  r.messages.forEach((m,i)=>{m.reactions=[];m.reactionScore=0});
+  for(const rx of REACTION_DATA){
+    let idx=null;
+    if(Number.isFinite(rx.messageIndex)&&r.messages[rx.messageIndex]) idx=rx.messageIndex;
+    if(idx===null&&rx.messageText){
+      const q=rx.messageText.toLowerCase(); const hit=r.messages.findIndex(m=>m.text.toLowerCase().includes(q)); if(hit>=0)idx=hit;
+    }
+    if(idx===null&&rx.targetDate&&rx.targetTime){
+      const ts=parseDate(rx.targetDate,rx.targetTime); let best=Infinity,bestI=null;
+      r.messages.forEach((m,i)=>{const d=Math.abs(m.ts-ts);if(d<best&&d<90000){best=d;bestI=i}});idx=bestI;
+    }
+    if(idx===null)continue;
+    const rec={...rx,weight:reactionWeight(rx.emoji)};
+    r.messages[idx].reactions.push(rec);r.messages[idx].reactionScore+=rec.weight;
+  }
+  r.reactionTotal=r.messages.reduce((s,m)=>s+m.reactions.length,0);
+  r.reactionByEmoji={};r.reactionBySender={};
+  for(const m of r.messages)for(const x of m.reactions){
+    r.reactionByEmoji[x.emoji]=(r.reactionByEmoji[x.emoji]||0)+1;
+    r.reactionBySender[x.reactor]??={};r.reactionBySender[x.reactor][x.emoji]=(r.reactionBySender[x.reactor][x.emoji]||0)+1;
+  }
+}
+
 ['dragenter','dragover'].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.add('drag')}));
 ['dragleave','drop'].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.remove('drag')}));
 drop.addEventListener('drop',e=>e.dataTransfer.files[0]&&loadFile(e.dataTransfer.files[0]));
 
 function loadFile(f){
+  if(/\.json$/i.test(f.name)){ loadReactionFile(f); return; }
   if(!/\.txt$/i.test(f.name)){fail('Please choose a WhatsApp .txt export.');return}
   $('fileName').textContent='✓ '+f.name;
   $('status').textContent='Parsing messages, timing, languages and patterns…';
@@ -755,6 +888,109 @@ function trendSeries(messages,buckets=14){
   return out;
 }
 
+
+/* =========================
+   OPEN VOCABULARY + SOCIAL RANKER
+   ========================= */
+const EMOTION_PROTOTYPES={
+  Warmth:['affection, warmth, tenderness, liking','حب، مودة، دفء، حنان','אהבה, חום, חיבה','любовь, тепло, нежность','affetto, calore, tenerezza','amor, calidez, ternura'],
+  Interest:['curiosity, interest, attention, wanting to know more','فضول، اهتمام، رغبة في المعرفة','סקרנות, עניין, תשומת לב','интерес, любопытство, внимание','curiosità, interesse, attenzione','curiosidad, interés, atención'],
+  Playfulness:['humor, teasing, joking, fun, playful energy','مزاح، ضحك، مرح، طاقة مرحة','הומור, צחוק, משחקיות','юмор, шутки, веселье','umorismo, scherzo, divertimento','humor, bromas, diversión'],
+  Support:['care, reassurance, encouragement, helping','دعم، طمأنة، تشجيع، مساعدة','תמיכה, עידוד, הרגעה','поддержка, забота, ободрение','supporto, incoraggiamento, cura','apoyo, ánimo, cuidado'],
+  Friction:['frustration, irritation, anger, disagreement, pressure','إحباط، انزعاج، غضب، خلاف، ضغط','תסכול, כעס, מחלוקת, לחץ','раздражение, злость, конфликт, давление','frustrazione, rabbia, disaccordo','frustración, enfado, desacuerdo'],
+  Distance:['coldness, withdrawal, emotional distance, detachment','برود، ابتعاد، مسافة، انسحاب','ריחוק, קור, התרחקות','отдаление, холодность, дистанция','distanza, freddezza','distancia, frialdad'],
+  Repair:['apology, repair, reconciliation, forgiveness','اعتذار، إصلاح، مصالحة، مسامحة','סליחה, פיוס, תיקון','извинение, примирение, прощение','scuse, riconciliazione, perdono','perdón, reconciliación, reparación'],
+  Uncertainty:['doubt, confusion, ambiguity, hesitation, not knowing','شك، حيرة، غموض، تردد','ספק, בלבול, אי ודאות','сомнение, путаница, неопределенность','dubbio, confusione, incertezza','duda, confusión, incertidumbre']
+};
+function ngramCandidates(messages){
+  const f={};
+  for(const m of messages)for(const w of words(m.text)){
+    if(w.length<3||STOP.has(w)||/^\d+$/.test(w))continue;
+    f[w]=(f[w]||0)+1;
+  }
+  return Object.entries(f).sort((a,b)=>b[1]-a[1]);
+}
+function socialRankMessages(r){
+  const now=r.messages.at(-1)?.ts||Date.now();
+  const maxAge=Math.max(7*86400000,now-(r.messages[0]?.ts||now));
+  const byParticipant={};
+  for(const m of r.messages)byParticipant[m.sender]=(byParticipant[m.sender]||[]).concat(m);
+  const recentTopicFreq={};
+  for(const m of r.messages.slice(-300))for(const w of words(m.text))if(w.length>=4&&!STOP.has(w))recentTopicFreq[w]=(recentTopicFreq[w]||0)+1;
+  return r.messages.map((m,i)=>{
+    const age=Math.max(0,now-m.ts),recency=Math.exp(-age/Math.max(maxAge*.23,1));
+    const reaction=(m.reactionScore||0)/2.2;
+    const next=r.messages[i+1],reply=next&&next.sender!==m.sender?1:0;
+    const followUp=next&&next.sender!==m.sender?clamp(next.words/14,0,1):0;
+    const question=isQuestion(m.text)?0.45:0;
+    const density=clamp((m.words/18),0,1);
+    const topic=words(m.text).reduce((a,w)=>a+(recentTopicFreq[w]||0),0)/Math.max(1,words(m.text).length*8);
+    const positivity=includesLex(m.text,POS);const friction=includesLex(m.text,CONFLICT)+.6*includesLex(m.text,NEG);
+    const continuity=clamp((reply*.65+followUp*.35),0,1);
+    const contentQuality=clamp(.25*density+.25*continuity+.2*topic+.15*question+.15*clamp(positivity/2,0,1),0,1);
+    const negativePenalty=clamp(friction*.12,0,.25);
+    const score=100*clamp(.34*recency+.23*clamp(reaction,0,1)+.18*contentQuality+.15*continuity+.10*topic-negativePenalty,0,1);
+    return {...m,socialRank:score,rankReasons:{recency,reaction,reply,followUp,topic,friction}};
+  }).sort((a,b)=>b.socialRank-a.socialRank).slice(0,12);
+}
+function openVocabHeuristic(r){
+  /* This layer is deliberately open-vocabulary: every observed token is allowed to
+     become a candidate. It is not capped to a hand-written emotion dictionary. */
+  const candidates=ngramCandidates(r.messages).slice(0,80);
+  const proto={Warmth:[],Interest:[],Playfulness:[],Support:[],Friction:[],Distance:[],Repair:[],Uncertainty:[]};
+  for(const [lang,arr] of Object.entries({en:0,ar:0,he:0,ru:0,it:0,es:0})){}
+  const rx={};
+  for(const [w,n] of candidates){
+    const x=w.toLowerCase();
+    if(POS.some(k=>x===k.toLowerCase()||k.toLowerCase().includes(x)))rx.Warmth.push(n);
+    if(NEG.some(k=>x===k.toLowerCase()||k.toLowerCase().includes(x)))rx.Friction.push(n);
+    if(APOLOGY.some(k=>x===k.toLowerCase()||k.toLowerCase().includes(x)))rx.Repair.push(n);
+    if(/\?|why|why|how|هل|لماذا|למה|почему|perché|por qué/.test(x))rx.Uncertainty.push(n);
+  }
+  const normalize=v=>clamp((v.reduce((a,b)=>a+b,0)||0)*2.4,0,100);
+  r.openVocab=Object.fromEntries(Object.keys(proto).map(k=>[k,normalize(rx[k]||[])]));
+  return r.openVocab;
+}
+async function computeSemanticOpenVocab(r){
+  if(!NEURAL)return;
+  try{
+    const entries=Object.entries(EMOTION_PROTOTYPES);
+    const protos=await embedding(entries.map(([,v])=>v[0]+'; '+v[1]+'; '+v[2]));
+    const sample=r.messages.length>160?
+      r.messages.filter((_,i)=>i%Math.ceil(r.messages.length/160)===0).slice(0,160):r.messages;
+    const embs=await embedding(sample.map(m=>m.text));
+    const agg={};entries.forEach(([k])=>agg[k]=0);
+    for(let i=0;i<embs.length;i++){
+      let total=0;
+      for(let j=0;j<protos.length;j++){
+        const sim=Math.max(0,cosine(embs[i],protos[j]));
+        const k=entries[j][0];agg[k]+=sim;total+=sim;
+      }
+    }
+    const vals=Object.entries(agg).map(([k,v])=>[k,Math.round((v/Math.max(1,embs.length))*100)]);
+    const max=Math.max(...vals.map(x=>x[1]),1);
+    r.semanticOpenVocab=Object.fromEntries(vals.map(([k,v])=>[k,clamp(v/max*100)]));
+    if(LAST===r)renderSocialOnly(r);
+  }catch(err){console.warn('semantic open-vocab failed',err)}
+}
+function renderSocialOnly(r){
+  const ranked=socialRankMessages(r).slice(0,6);
+  $('socialRankList').innerHTML=ranked.length?ranked.map((m,i)=>`<div class="rank-item">
+    <div class="rank-pos">#${i+1}</div><div class="rank-main"><div class="rank-title">${esc(m.sender)} · ${esc(m.text.replace(/\n/g,' '))}</div>
+    <div class="rank-meta">reaction ${m.reactions?.length||0} · ${m.rankReasons.reply?'reply':'no direct reply'} · ${m.rankReasons.friction?'friction signal':''}</div>
+    <div class="rank-meter"><i style="width:${Math.round(m.socialRank)}%"></i></div></div>
+    <div class="rank-score">${Math.round(m.socialRank)}</div></div>`).join(''):
+    '<div class="subtxt">No messages available for ranking.</div>';
+
+  if(r.reactionTotal){
+    const top=r.messages.filter(m=>m.reactions?.length).sort((a,b)=>b.reactionScore-a.reactionScore).slice(0,5);
+    const summary=`<div class="signalgrid"><div class="signal"><strong class="gold">${r.reactionTotal}</strong><span>message reactions loaded</span></div><div class="signal"><strong class="cyan">${Object.keys(r.reactionByEmoji||{}).length}</strong><span>reaction types</span></div></div>`;
+    const msgs=top.map(m=>`<div class="reaction-message"><div class="reaction-message-top"><strong>${esc(m.sender)}</strong><span class="reaction-count">${m.reactions.length} reaction${m.reactions.length>1?'s':''}</span></div><div class="subtxt">${esc(m.text.slice(0,125))}</div><div class="reaction-pills">${m.reactions.map(x=>`<span class="reaction-pill">${x.emoji} <small>${esc(x.reactor)}</small></span>`).join('')}</div></div>`).join('');
+    $('reactionInsight').innerHTML=summary+msgs;
+  }
+  const vocab=r.semanticOpenVocab||r.openVocab||{};
+  $('openVocabGrid').innerHTML=Object.entries(vocab).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([k,v])=>`<div class="emotion-card"><div class="emotion-top"><b>${k}</b><span class="emotion-score">${Math.round(v)}</span></div><div class="emotion-bar"><i style="width:${clamp(v)}%"></i></div></div>`).join('');
+}
 /* =========================
    ANALYSIS
    ========================= */
@@ -807,6 +1043,8 @@ function analyze(raw){
   const coverage=clamp(52+Math.min(23,replyTimes.length/Math.max(1,total)*100)+Math.min(25,names.length*5));
 
   const result={messages,total,totalWords,names,by,sorted,sessions,sessionGap:sb.threshold,replyTimes,dominant,langs,tone,emojis,conflicts,topics,trend,relation,depth,participation,initiation,replyScore,pulse,coverage,topWords:topWords(messages)};
+  openVocabHeuristic(result);
+  if(REACTION_DATA.length)attachReactions(result);
   LAST=result; render(result);
   $('dashboard').style.display='block';
   $('status').textContent=`✓ Analyzed ${total.toLocaleString()} messages across ${names.length} participants`;
@@ -822,6 +1060,7 @@ function render(r){
   $('confidenceBig').textContent=Math.round(r.coverage)+'%';
   renderPulse(r);renderBalance(r);renderParticipants(r);renderLanguages(r);renderTone(r);
   renderInsights(r);renderTopics(r);renderEmoji(r);renderConflict(r);renderTrends(r);renderSessions(r);renderRecent(r);renderStory(r);
+  renderSocialOnly(r);
   drawCharts(r);
 }
 
@@ -1017,8 +1256,8 @@ async function loadNeural(){
     const extractor=await pipeline('feature-extraction','Xenova/paraphrase-multilingual-MiniLM-L12-v2',{dtype:'q8'});
     NEURAL=extractor;
     $('semanticBtn').textContent='Neural NLP enabled ✓';
-    $('status').textContent='✓ Multilingual semantic model is ready.';
-    if(LAST)await applySemantic(LAST);
+    $('status').textContent='✓ Multilingual semantic model is ready. Open-vocabulary signals are available.';
+    if(LAST){await applySemantic(LAST); await computeSemanticOpenVocab(LAST);}
     return NEURAL;
   }catch(err){
     console.error(err);
