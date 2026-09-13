@@ -1,384 +1,99 @@
 <!doctype html>
 <html lang="en" dir="ltr">
 <head>
-<meta name="google-site-verification" content="4j5ULNTNE2ixVPpcLIiCN8Q4c06Ce2WU94GCSvMtyeU" />
+    <meta name="google-site-verification" content="4j5ULNTNE2ixVPpcLIiCN8Q4c06Ce2WU94GCSvMtyeU" />
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#070b14">
-<meta name="description" content="ConvoLens — multilingual conversation intelligence, relationship patterns, domain analysis and semantic NLP.">
-<title>ConvoLens — Conversation Intelligence</title>
-
-<!--
-CONVOLENS FRONTEND / SINGLE-FILE STARTUP EDITION
-================================================
-
-This build preserves the large single-file product approach and expands it with:
-- multilingual WhatsApp parsing
-- relationship pattern analysis
-- conversation sessions and response timing
-- conflict radar and repair signals
-- emoji intelligence that counts ONLY emoji typed in message text
-- reaction intelligence separated from message emoji
-- strict reaction target resolution: messageId > explicit index > exact unique text > nearby timestamp
-- ambiguous/orphan reactions are rejected instead of guessed
-- broad Conversation Dimension Engine
-- attachment-like / romantic / friendship / professional / study / sports / fitness /
-  support / humor / jealousy-like / distance / planning / finance / travel / family /
-  wellbeing / interest / communication effort
-- semantic embeddings via Transformers.js lazy loading
-- zero-shot classification when the model is available
-- optional multimodal image analysis
-- honest video handling through keyframes instead of fake full-video understanding
-- social signal ranking
-- interactive timeline slider
-- data quality / integrity reporting
-- JSON and CSV exports
-- AI Story backend hook
-- Stripe Checkout backend hook
-
-The product intentionally does NOT claim to read private thoughts. Scores are observable
-communication/domain signals, not clinical or psychological diagnoses.
-
-SECURITY:
-- Never put Stripe secret keys in this file.
-- Never put private AI provider keys in this file.
-- AI + checkout should be implemented on HTTPS backend endpoints.
--->
-
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="preconnect" href="https://unpkg.com" crossorigin>
+<meta name="theme-color" content="#050812">
+<meta name="description" content="ConvoLens — Conversation Intelligence">
+<title>ConvoLens</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"></script>
 
 <style>
-:root{
-  --bg:#050812;
-  --bg2:#08111c;
-  --panel:rgba(11,18,30,.86);
-  --panel2:#0d1724;
-  --line:#1b2a3c;
-  --line2:#29445c;
-  --text:#f4f8ff;
-  --muted:#8ea2b8;
-  --cyan:#4fd8ff;
-  --blue:#5b7cff;
-  --violet:#a78bfa;
-  --green:#31e891;
-  --gold:#ffc857;
-  --red:#ff6685;
-  --orange:#ff995a;
-  --pink:#ff8fd0;
-  --shadow:0 30px 100px rgba(0,0,0,.45);
-  --radius:20px;
-}
+:root{--bg:#050812;--panel:#0a131f;--line:#1c2b3d;--text:#f4f8ff;--muted:#8ea2b8;--cyan:#4fd8ff;--violet:#a78bfa;--green:#31e891;--gold:#ffc857;--red:#ff6685;--pink:#ff8fd0}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{
-  margin:0;
-  min-height:100vh;
-  color:var(--text);
-  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
-  background:
-    radial-gradient(850px 480px at 7% -5%,rgba(50,128,255,.20),transparent 60%),
-    radial-gradient(900px 540px at 96% 8%,rgba(132,62,255,.17),transparent 59%),
-    linear-gradient(180deg,#04070e 0,#07101a 45%,#04070c 100%);
-}
-body:before{
-  content:"";
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  opacity:.12;
-  background-image:
-    linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
-  background-size:42px 42px;
-}
-button,input,select,textarea{font:inherit}
-button{cursor:pointer}
+body{margin:0;color:var(--text);font-family:Inter,system-ui,Arial,sans-serif;background:radial-gradient(900px 500px at 0 -10%,rgba(50,128,255,.18),transparent 60%),radial-gradient(900px 500px at 100% 0,rgba(132,62,255,.16),transparent 60%),linear-gradient(180deg,#04070e,#07101a 50%,#04070c)}
+button,input,select{font:inherit}button{cursor:pointer}
 .app{width:min(1380px,100%);margin:auto;padding:18px}
-.topbar{height:60px;display:flex;align-items:center;justify-content:space-between;gap:15px}
-.brand{display:flex;align-items:center;gap:10px;font-weight:950;font-size:21px;letter-spacing:-.7px}
-.logo{width:36px;height:36px;display:grid;place-items:center;border-radius:12px;background:linear-gradient(145deg,var(--cyan),var(--violet));box-shadow:0 0 32px rgba(79,216,255,.16)}
-.brand em{font-style:normal;color:var(--cyan)}
-.toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.pill,.tinybtn{border:1px solid var(--line);background:#09131f;color:var(--text);border-radius:999px;padding:8px 11px;font-size:11px}
-.tinybtn{border-radius:10px}
-.live{font:10px ui-monospace,SFMono-Regular,monospace;color:var(--green);border:1px solid #155837;background:#061b13;border-radius:999px;padding:7px 10px}
-.hero{padding:72px 0 35px;max-width:1100px}
-.kicker{font:800 11px ui-monospace,SFMono-Regular,monospace;letter-spacing:2px;color:var(--cyan)}
-.hero h1{font-size:clamp(44px,7vw,82px);line-height:.96;letter-spacing:-4px;margin:13px 0 19px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:55px}
+.brand{font-size:22px;font-weight:950}.brand i{color:var(--cyan);font-style:normal}
+.tools{display:flex;gap:7px;flex-wrap:wrap}
+.btn,.tiny{border:1px solid var(--line);background:#09131f;color:var(--text);border-radius:10px;padding:9px 12px;font-size:11px}
+.btn.main{border:0;color:#00131c;font-weight:900;background:linear-gradient(90deg,var(--cyan),#79caff)}
+.hero{padding:60px 0 30px;max-width:1050px}
+.kicker{font:800 11px monospace;letter-spacing:2px;color:var(--cyan)}
+h1{font-size:clamp(45px,7vw,80px);line-height:.98;letter-spacing:-4px;margin:12px 0 18px}
 .grad{background:linear-gradient(90deg,var(--cyan),var(--violet),var(--green));-webkit-background-clip:text;background-clip:text;color:transparent}
-.hero p{font-size:18px;line-height:1.75;color:var(--muted);max-width:920px;margin:0}
-.tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:19px}
-.tag{border:1px solid var(--line);background:#09131f;color:#b9cad9;border-radius:999px;padding:7px 10px;font-size:10px}
-.upload{position:relative;overflow:hidden;border:1px solid #28445d;border-radius:26px;padding:35px;background:linear-gradient(140deg,rgba(15,28,43,.94),rgba(7,14,23,.96));box-shadow:var(--shadow);transition:.25s}
-.upload.drag{border-color:var(--cyan);transform:translateY(-2px);box-shadow:0 35px 100px rgba(44,192,255,.14)}
-.upload:after{content:"";position:absolute;inset:auto -20% -80% 14%;height:160px;background:radial-gradient(circle,rgba(79,216,255,.11),transparent 68%);pointer-events:none}
-.uploadin{position:relative;z-index:1;text-align:center}
-.uploadico{font-size:44px;filter:drop-shadow(0 9px 25px rgba(79,216,255,.15))}
-.upload h3{margin:8px 0 5px;font-size:21px}
-.upload p{margin:0 auto 17px;color:var(--muted);font-size:13px;max-width:760px;line-height:1.6}
+.hero p{max-width:900px;color:var(--muted);font-size:17px;line-height:1.7}
+.tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:18px}
+.tag{border:1px solid var(--line);background:#09131f;border-radius:99px;padding:6px 9px;color:#b8c8d7;font-size:9px}
+.upload{border:1px solid #29455e;border-radius:22px;padding:35px;text-align:center;background:linear-gradient(145deg,#0d1c2b,#07101b);box-shadow:0 25px 80px rgba(0,0,0,.35)}
+.upload .ico{font-size:42px}.upload h3{margin:10px 0 6px}.upload p{margin:0 auto 17px;color:var(--muted);max-width:750px;font-size:12px;line-height:1.6}
 input[type=file]{display:none}
-.btn{border:0;border-radius:12px;padding:13px 19px;font-weight:900;color:#00131c;background:linear-gradient(90deg,var(--cyan),#79caff);box-shadow:0 12px 32px rgba(79,216,255,.15)}
-.btn.dark{color:var(--text);background:#101d2b;border:1px solid var(--line);box-shadow:none}
-.btn.pro{color:#fff;background:linear-gradient(100deg,#7c3aed,#22d3ee)}
-.privacy{display:inline-flex;margin-top:15px;gap:6px;align-items:center;font-size:10px;color:#7fe8ad;border:1px solid #185838;background:#061c13;border-radius:999px;padding:6px 10px}
-.status{min-height:28px;padding:10px 2px;color:var(--muted);font-size:12px}
-.error{display:none;padding:13px 14px;color:#ffd4dc;background:#28111a;border:1px solid #67293b;border-radius:12px}
-#dashboard{display:none}
-.section{margin-top:18px}
-.head{display:flex;align-items:end;justify-content:space-between;gap:15px;margin-bottom:12px}
-.head h2{margin:0;font-size:18px;letter-spacing:-.3px}
-.head .sub{margin:0;color:var(--muted);font-size:11px}
-.cards{display:grid;grid-template-columns:repeat(8,1fr);gap:10px}
-.card,.panel{background:linear-gradient(180deg,rgba(11,18,28,.90),rgba(8,14,23,.94));border:1px solid var(--line);border-radius:17px;box-shadow:0 15px 50px rgba(0,0,0,.15)}
-.card{padding:15px;min-height:105px}
-.label{font-size:9px;color:var(--muted);letter-spacing:.7px}
-.value{margin-top:9px;font:900 25px/1.2 ui-monospace,SFMono-Regular,monospace}
-.muted{color:var(--muted)}
-.cyan{color:var(--cyan)}.green{color:var(--green)}.violet{color:var(--violet)}.gold{color:var(--gold)}.red{color:var(--red)}.orange{color:var(--orange)}.pink{color:var(--pink)}
-.panel{padding:18px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:15px}
-.grid3{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:15px}
-.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.pulsegrid{display:grid;grid-template-columns:195px 1fr 260px;gap:24px;align-items:center}
-.score{width:176px;height:176px;border-radius:50%;margin:auto;display:grid;place-items:center;position:relative;background:conic-gradient(var(--cyan) 0deg,var(--green) 0deg,#172333 0deg)}
+.status{min-height:30px;padding:10px 2px;color:var(--muted);font-size:11px}
+.error{display:none;padding:12px 14px;border:1px solid #67293b;background:#28111a;color:#ffd4dc;border-radius:10px}
+#dashboard{display:none}.section{margin-top:16px}
+.panel{background:linear-gradient(180deg,rgba(10,18,29,.94),rgba(7,14,23,.96));border:1px solid var(--line);border-radius:16px;padding:16px}
+.cards{display:grid;grid-template-columns:repeat(7,1fr);gap:9px}
+.card{background:#09131e;border:1px solid var(--line);border-radius:14px;padding:13px;min-height:95px}
+.label{font-size:8px;color:var(--muted);letter-spacing:.8px}.value{margin-top:8px;font:900 23px monospace}
+.cyan{color:var(--cyan)}.green{color:var(--green)}.violet{color:var(--violet)}.gold{color:var(--gold)}.red{color:var(--red)}.pink{color:var(--pink)}
+.head{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:11px}.head h2{font-size:17px;margin:0}.sub{font-size:10px;color:var(--muted);margin:4px 0 0;line-height:1.5}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}.grid3{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:14px}
+.pulse{display:grid;grid-template-columns:190px 1fr 240px;gap:20px;align-items:center}
+.score{width:175px;height:175px;border-radius:50%;margin:auto;display:grid;place-items:center;background:conic-gradient(var(--cyan) 0deg,var(--green) 0deg,#172333 0deg);position:relative}
 .score:after{content:"";position:absolute;inset:12px;border-radius:50%;background:#09111b}
-.scorein{position:relative;z-index:2;text-align:center}
-.scoren{font-size:46px;font-weight:950;line-height:1}
-.scores{font:10px ui-monospace,SFMono-Regular,monospace;color:var(--muted);margin-top:5px}
-.meters{display:grid;gap:14px}
-.meterhead{display:flex;justify-content:space-between;gap:10px;font-size:11px}
-.track{height:8px;background:#162433;border-radius:99px;overflow:hidden}
-.fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--cyan),var(--green))}
-.note{padding:14px;border-radius:14px;border:1px solid var(--line);background:#09131e}
-.note .big{font-size:28px;font-weight:950}
-.note small{display:block;color:var(--muted);font-size:10px;line-height:1.6;margin-top:6px}
-.list{display:grid;gap:4px}
-.row{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid #182534}
-.row:last-child{border-bottom:0}
-.rowmain{min-width:0}
-.title{font-size:13px;font-weight:800}
-.subtxt{font-size:10px;color:var(--muted);margin-top:3px}
-.barline{display:grid;grid-template-columns:150px 1fr 48px;gap:8px;align-items:center;font-size:11px}
-.barlabel{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.signalgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-.signal{padding:11px;border:1px solid var(--line);background:#09131d;border-radius:11px}
-.signal strong{font-size:13px}
-.signal span{display:block;color:var(--muted);font-size:9px;margin-top:3px}
-.insight{border:1px solid var(--line);background:#09131e;border-radius:12px;padding:13px;margin-top:8px}
-.insight .tag2{font:900 9px ui-monospace,SFMono-Regular,monospace;letter-spacing:1px;color:var(--cyan)}
-.insight p{font-size:12px;line-height:1.55;margin:5px 0 0}
-.insight small{display:block;color:#70869b;margin-top:7px;font-size:9px}
-.chartbox{height:270px}
-.chartbox.sm{height:210px}
-.chartbox canvas{width:100%!important;height:100%!important}
-.emojiwrap{display:flex;flex-wrap:wrap;gap:8px}
-.emoji{display:flex;align-items:center;gap:7px;padding:9px 10px;background:#0a1520;border:1px solid var(--line);border-radius:12px;font-size:18px}
-.emoji b{font:800 10px ui-monospace,SFMono-Regular,monospace;color:var(--muted)}
-.topic{display:grid;grid-template-columns:170px 1fr 60px;gap:10px;align-items:center;margin:10px 0;font-size:11px}
-.chip2{border:1px solid var(--line);background:#09131e;border-radius:10px;padding:8px 9px;font-size:10px;color:#b9c7d4}
-.story{border:1px solid #263b52;background:linear-gradient(135deg,rgba(11,21,34,.96),rgba(10,17,28,.96));border-radius:16px;padding:16px}
-.story h3{margin:0 0 7px}
-.story p{margin:0;color:#c0cfdd;font-size:12px;line-height:1.7}
-.pay{margin-top:18px;padding:23px;border-radius:20px;border:1px solid #4e421a;background:linear-gradient(125deg,rgba(28,21,10,.94),rgba(10,17,26,.96));display:flex;align-items:center;justify-content:space-between;gap:18px}
-.pay h3{margin:0 0 5px}
-.pay p{margin:0;color:var(--muted);font-size:11px;max-width:770px;line-height:1.6}
-.progrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
-.profeature{padding:12px;border:1px solid #4e421a;background:#17140d;border-radius:12px}
-.profeature strong{font-size:11px}
-.profeature span{display:block;color:#a99a7e;font-size:9px;margin-top:4px;line-height:1.5}
-.foot{color:#61758a;font-size:9px;line-height:1.65;margin:15px 2px}
-.toast{position:fixed;z-index:20;left:50%;bottom:20px;transform:translateX(-50%);background:#0d1925;border:1px solid var(--line2);padding:12px 14px;border-radius:12px;box-shadow:var(--shadow);display:none;font-size:11px}
-.modal{position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.68);display:none;place-items:center;padding:20px;backdrop-filter:blur(12px)}
-.modalbox{width:min(560px,100%);border:1px solid #33465d;background:#09111c;border-radius:20px;padding:22px;box-shadow:var(--shadow)}
-.modalhead{display:flex;justify-content:space-between;align-items:center;gap:12px}
-.price{font:900 34px ui-monospace,SFMono-Regular,monospace;margin:12px 0;color:var(--cyan)}
-.modal ul{margin:10px 0 15px;padding-left:20px;color:#bac7d3;font-size:11px;line-height:1.8}
-.rowBtns{display:flex;gap:8px;justify-content:flex-end}
-.small{font-size:9px;color:var(--muted);line-height:1.5}
-
-/* ===== ENTERPRISE DIMENSION ENGINE ===== */
-.dimension-toolbar{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px}
-.dim-filter{border:1px solid var(--line);background:#09131e;color:#aebfd0;padding:8px 10px;border-radius:999px;font-size:10px}
-.dim-filter.active{color:#00131c;background:linear-gradient(90deg,var(--cyan),#79caff)}
-.dimension-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.dimension{padding:14px;border:1px solid var(--line);background:#09131e;border-radius:14px;min-height:190px}
-.dimension-top{display:flex;justify-content:space-between;gap:9px;align-items:center}
-.dimension-name{font-size:11px;font-weight:900}
-.dimension-score{font:900 12px ui-monospace,SFMono-Regular,monospace}
-.dimension-sub{margin-top:6px;min-height:34px;color:var(--muted);font-size:9px;line-height:1.45}
-.dimension-track{height:7px;background:#172433;border-radius:99px;margin-top:9px;overflow:hidden}
-.dimension-track i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--violet),var(--cyan))}
-.dimension-meta{margin-top:8px;color:#71869a;font-size:8px}
-.dimension-evidence{margin-top:8px;display:flex;flex-wrap:wrap;gap:4px}
-.dimension-evidence span{border:1px solid #1d3043;background:#0a1520;border-radius:999px;padding:4px 6px;font-size:8px;color:#a8b8c8}
-.dimension-disclaimer{margin-top:12px;padding:10px 12px;border:1px solid #3d4b61;background:#0b1521;border-radius:12px;color:#8ca0b4;font-size:9px;line-height:1.6}
-
-/* ===== SEMANTIC ENGINE ===== */
-.semantic-layout{display:grid;grid-template-columns:1fr 1.4fr;gap:18px}
-.semantic-score-card{display:flex;align-items:center;gap:14px;padding:16px;border:1px solid var(--line);background:#09131e;border-radius:15px}
-.semantic-number{width:65px;height:65px;display:grid;place-items:center;border-radius:50%;background:conic-gradient(var(--violet) 0deg,var(--cyan) 0deg,#162536 0deg);font-size:18px;font-weight:950}
-.semantic-score-card small{display:block;margin-top:4px;color:var(--muted);font-size:9px;line-height:1.5}
-.semantic-labels{display:grid;gap:8px;margin-top:12px}
-.semantic-label{padding:11px;border:1px solid var(--line);border-radius:11px;background:#09131e}
-.semantic-label-top{display:flex;justify-content:space-between;gap:10px;font-size:10px}
-.semantic-label-track{height:6px;margin-top:7px;border-radius:99px;overflow:hidden;background:#172433}
-.semantic-label-track i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--violet),var(--cyan))}
-
-/* ===== REACTION QUALITY ===== */
-.reaction-badge{display:inline-flex;align-items:center;gap:5px;border:1px solid #523548;background:#160f16;color:#ffb2db;padding:4px 7px;border-radius:999px;font-size:8px}
-.emoji-badge{display:inline-flex;align-items:center;gap:5px;border:1px solid #223549;background:#0a1520;color:#b9cade;padding:4px 7px;border-radius:999px;font-size:8px}
-.integrity-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:9px}
-.integrity-box{padding:12px;border:1px solid var(--line);border-radius:12px;background:#09131e}
-.integrity-box strong{display:block;font:900 18px ui-monospace,SFMono-Regular,monospace}
-.integrity-box span{display:block;color:var(--muted);font-size:8px;margin-top:4px;line-height:1.45}
-
-/* ===== TIMELINE ===== */
-.timeline-slider{width:100%;height:10px;accent-color:var(--cyan);cursor:pointer;touch-action:pan-x}
-.timeline-value{margin:10px 0;color:var(--cyan);font:900 12px ui-monospace,SFMono-Regular,monospace}
-.timeline-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
-.timeline-metric{padding:12px;border:1px solid var(--line);border-radius:12px;background:#09131e}
-.timeline-metric strong{font-size:16px}
-.timeline-metric span{display:block;margin-top:4px;font-size:9px;color:var(--muted)}
-
-/* ===== SOCIAL RANKING ===== */
-.social-panel{margin-top:18px}
-.social-hero{display:grid;grid-template-columns:1.15fr .85fr;gap:12px}
-.rank-list{display:grid;gap:8px}
-.rank-item{display:grid;grid-template-columns:42px 1fr 66px;gap:11px;align-items:center;padding:11px;border:1px solid var(--line);border-radius:13px;background:#09131e}
-.rank-pos{font:900 15px ui-monospace,SFMono-Regular,monospace;color:#6f8398;text-align:center}
-.rank-main{min-width:0}
-.rank-title{font-size:11px;font-weight:850;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rank-meta{font-size:9px;color:#71869a;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rank-score{font:900 12px ui-monospace,SFMono-Regular,monospace;text-align:right;color:var(--cyan)}
-.rank-meter{height:5px;background:#172433;border-radius:99px;overflow:hidden;margin-top:6px}
-.rank-meter i{display:block;height:100%;background:linear-gradient(90deg,var(--cyan),var(--violet));border-radius:99px}
-.reaction-message{padding:12px;border:1px solid var(--line);border-radius:13px;background:#09131e;margin-top:8px}
-.reaction-message-top{display:flex;justify-content:space-between;gap:10px;align-items:center}
-.reaction-count{font:900 10px ui-monospace,SFMono-Regular,monospace;color:#ff9bd2}
-.reaction-pills{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
-.reaction-pill{font-size:13px;padding:4px 6px;border-radius:8px;background:#111d2b;border:1px solid #213449}
-.open-vocab{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-.emotion-card{padding:12px;border:1px solid var(--line);border-radius:12px;background:#09131e}
-.emotion-top{display:flex;justify-content:space-between;gap:8px;font-size:10px}
-.emotion-score{font:900 10px ui-monospace,SFMono-Regular,monospace;color:var(--violet)}
-.emotion-bar{height:6px;background:#172433;border-radius:99px;overflow:hidden;margin-top:8px}
-.emotion-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--violet),var(--cyan))}
-.rank-disclaimer{font-size:9px;line-height:1.55;color:#71869a;margin-top:9px}
-
-/* ===== DATA QUALITY ===== */
-.quality-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
-.quality-item{padding:12px;border:1px solid var(--line);border-radius:12px;background:#09131e}
-.quality-item strong{font-size:12px}
-.quality-item span{display:block;font-size:9px;color:var(--muted);margin-top:4px;line-height:1.5}
-
-/* ===== MULTIMODAL ===== */
-.media-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:12px}
-.media-card{padding:14px;border:1px solid var(--line);border-radius:14px;background:#09131e}
-.media-preview{width:100%;max-height:280px;object-fit:cover;border-radius:12px;border:1px solid #1b2d42}
-.media-labels{display:grid;gap:7px;margin-top:10px}
-.media-label{display:flex;justify-content:space-between;gap:12px;font-size:10px}
-.media-label .track{flex:1}
-
-/* ===== EXPORT / FILTER TOOLBAR ===== */
-.toolrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.select{border:1px solid var(--line);background:#09131e;color:var(--text);border-radius:10px;padding:8px 10px;font-size:10px}
-.search{border:1px solid var(--line);background:#08121e;color:var(--text);border-radius:10px;padding:9px 11px;min-width:220px;font-size:10px;outline:none}
-.search:focus{border-color:var(--cyan)}
-
-@media(max-width:1180px){
-  .cards{grid-template-columns:repeat(4,1fr)}
-  .dimension-grid{grid-template-columns:repeat(3,1fr)}
-  .integrity-grid{grid-template-columns:repeat(3,1fr)}
-  .quality-grid{grid-template-columns:repeat(2,1fr)}
-}
-@media(max-width:1000px){
-  .grid3{grid-template-columns:1fr}
-  .pulsegrid{grid-template-columns:190px 1fr}
-  .note{grid-column:1/-1}
-  .social-hero{grid-template-columns:1fr}
-  .semantic-layout{grid-template-columns:1fr}
-  .media-grid{grid-template-columns:1fr}
-}
-@media(max-width:780px){
-  .grid2,.pulsegrid{grid-template-columns:1fr}
-  .cards{grid-template-columns:repeat(2,1fr)}
-  .dimension-grid{grid-template-columns:repeat(2,1fr)}
-  .integrity-grid,.quality-grid,.timeline-grid{grid-template-columns:1fr 1fr}
-  .progrid{grid-template-columns:1fr}
-  .barline{grid-template-columns:95px 1fr 42px}
-  .topic{grid-template-columns:100px 1fr 42px}
-  .live{display:none}
-  .hero h1{letter-spacing:-2px}
-  .chartbox{height:240px}
-}
-@media(max-width:500px){
-  .app{padding:11px}
-  .hero{padding-top:40px}
-  .hero p{font-size:15px}
-  .cards{grid-template-columns:1fr 1fr}
-  .dimension-grid{grid-template-columns:1fr}
-  .integrity-grid,.quality-grid,.timeline-grid{grid-template-columns:1fr 1fr}
-  .chartbox{height:220px}
-  .toolbar .pill{display:none}
-}
-
-/* ===== DEEP STARTUP EXTENSION ===== */
-.reco-hero{display:grid;grid-template-columns:1fr 1fr;gap:14px}.reco-score{padding:16px;border:1px solid var(--line);border-radius:15px;background:#09131e}.reco-score strong{font:950 38px ui-monospace,SFMono-Regular,monospace}.reco-score span{display:block;color:var(--muted);font-size:9px;margin-top:4px;line-height:1.5}.reco-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:12px}.reco-card{padding:12px;border:1px solid var(--line);border-radius:12px;background:#09131e}.reco-card b{font-size:11px}.reco-card span{display:block;color:var(--muted);font-size:9px;line-height:1.5;margin-top:4px}.open-discovery{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.discovery-item{padding:11px;border:1px dashed #29445c;border-radius:12px;background:#08121d}.discovery-item strong{font-size:10px}.discovery-item span{display:block;font-size:8px;color:var(--muted);margin-top:4px;line-height:1.5}.discovery-score{font:900 10px ui-monospace,SFMono-Regular,monospace;color:var(--cyan);margin-top:7px}.integrity-alert{padding:12px;border-radius:12px;border:1px solid #493448;background:#140d15;margin-top:10px;color:#aebdcb;font-size:10px;line-height:1.6}.integrity-alert strong{color:#ffb0d7}.profile-controls{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}.profile-controls select,.profile-controls input{width:100%;padding:9px 10px;border-radius:10px;border:1px solid var(--line);background:#09131e;color:var(--text)}.evidence-list{display:grid;gap:6px;margin-top:8px}.evidence-row{padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#08131e;font-size:9px;color:#9db0c4;line-height:1.5}.evidence-row b{color:var(--text)}@media(max-width:1000px){.reco-hero{grid-template-columns:1fr}.reco-grid{grid-template-columns:repeat(2,1fr)}.open-discovery{grid-template-columns:repeat(2,1fr)}.profile-controls{grid-template-columns:1fr}}@media(max-width:650px){.reco-grid,.open-discovery{grid-template-columns:1fr}}
+.scorein{position:relative;z-index:2;text-align:center}.scorein strong{font-size:45px}.scorein span{display:block;color:var(--muted);font:10px monospace;margin-top:4px}
+.meters{display:grid;gap:13px}.mh{display:flex;justify-content:space-between;font-size:10px}
+.track{height:7px;border-radius:99px;background:#172433;overflow:hidden}.fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--cyan),var(--green))}
+.note{background:#09131e;border:1px solid var(--line);border-radius:12px;padding:13px}.note strong{font-size:27px}.note small{display:block;color:var(--muted);font-size:9px;line-height:1.5;margin-top:5px}
+.signalgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.signal{padding:10px;background:#09131e;border:1px solid var(--line);border-radius:10px}.signal b{font-size:13px}.signal span{display:block;color:var(--muted);font-size:8px;margin-top:3px;line-height:1.45}
+.dimension-toolbar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}.dim{border:1px solid var(--line);background:#09131e;color:#aebfd0;border-radius:99px;padding:7px 9px;font-size:9px}.dim.active{background:linear-gradient(90deg,var(--cyan),#79caff);color:#00131c}
+.dimension-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.dimension{padding:12px;background:#09131e;border:1px solid var(--line);border-radius:12px}
+.dtop{display:flex;justify-content:space-between;font-size:10px;font-weight:900}.dimension p{color:var(--muted);font-size:8px;line-height:1.45;min-height:32px}
+.evidence{display:flex;gap:4px;flex-wrap:wrap;margin-top:7px}.evidence span{font-size:7px;border:1px solid #1d3043;border-radius:99px;padding:3px 5px;color:#a9bac9}
+.barline{display:grid;grid-template-columns:125px 1fr 40px;gap:7px;align-items:center;font-size:9px;margin:8px 0}
+.topic{display:grid;grid-template-columns:165px 1fr 45px;gap:8px;align-items:center;margin:8px 0;font-size:9px}
+.emojiwrap{display:flex;flex-wrap:wrap;gap:6px}.emoji{padding:8px 9px;background:#09131e;border:1px solid var(--line);border-radius:10px;font-size:17px}.emoji b{font:8px monospace;color:var(--muted);margin-left:5px}
+.chart{height:260px;position:relative}.chart.sm{height:210px}.slider{width:100%;accent-color:var(--cyan)}
+.timeline{display:grid;grid-template-columns:repeat(6,1fr);gap:7px}.tm{padding:10px;background:#09131e;border:1px solid var(--line);border-radius:10px}.tm b{font-size:15px}.tm span{display:block;color:var(--muted);font-size:8px;margin-top:3px}
+.insight{margin-top:7px;padding:11px;background:#09131e;border:1px solid var(--line);border-radius:10px}.insight b{color:var(--cyan);font:900 8px monospace;letter-spacing:1px}.insight p{font-size:10px;line-height:1.5;margin:5px 0 0}
+.foot{color:#61758a;font-size:8px;line-height:1.6;margin:14px 2px}
+@media(max-width:1200px){.cards{grid-template-columns:repeat(4,1fr)}.dimension-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:950px){.pulse,.grid3{grid-template-columns:1fr}}
+@media(max-width:750px){.cards{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}.dimension-grid{grid-template-columns:repeat(2,1fr)}.timeline{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:500px){.dimension-grid{grid-template-columns:1fr}h1{letter-spacing:-2px}}
 </style>
 </head>
 
 <body>
 <div class="app">
 
-<header class="topbar">
-  <div class="brand"><div class="logo">✦</div>Convo<em>Lens</em></div>
-  <div class="toolbar">
-    <button class="tinybtn" id="langBtn">العربية</button>
-    <button class="tinybtn" id="exportJsonBtn">Export JSON</button>
-    <button class="tinybtn" id="exportCsvBtn">Export CSV</button>
-    <span class="live">● LOCAL + TRANSFORMER</span>
+<header class="top">
+  <div class="brand">Convo<i>Lens</i></div>
+  <div class="tools">
+    <button class="tiny" id="langBtn">العربية</button>
+    <button class="tiny" id="jsonBtn">Export JSON</button>
+    <button class="tiny" id="csvBtn">Export CSV</button>
   </div>
 </header>
 
 <section class="hero">
-  <div class="kicker">CONVERSATION INTELLIGENCE / X</div>
-  <h1 id="heroTitle">See the <span class="grad">signals</span> behind the messages.</h1>
-  <p id="heroDesc">
-    Upload a WhatsApp export and turn raw messages into a measurable conversation profile:
-    who initiates, who responds, how communication changes, what domains dominate, and how
-    semantic models interpret the language without pretending to read private thoughts.
-  </p>
+  <div class="kicker">CONVERSATION INTELLIGENCE</div>
+  <h1 id="title">See the <span class="grad">signals</span> behind the messages.</h1>
+  <p id="desc">Upload a WhatsApp export and analyze participation, timing, language, topics, sports, relationship patterns, conflict, emoji and interaction signals.</p>
   <div class="tags">
-    <span class="tag">Arabic</span><span class="tag">English</span><span class="tag">עברית</span>
-    <span class="tag">Русский</span><span class="tag">Italiano</span><span class="tag">Español</span>
-    <span class="tag">Transformer</span><span class="tag">Embeddings</span><span class="tag">Zero-shot</span>
-    <span class="tag">Multimodal</span><span class="tag">Reaction Integrity</span><span class="tag">Local-first</span>
+    <span class="tag">Arabic</span><span class="tag">English</span><span class="tag">Hebrew</span><span class="tag">Russian</span><span class="tag">Italian</span><span class="tag">Spanish</span><span class="tag">Sports</span><span class="tag">Relationship</span><span class="tag">Conflict</span><span class="tag">Emoji</span><span class="tag">Local-first</span>
   </div>
 </section>
 
-<section class="upload" id="dropZone">
-  <div class="uploadin">
-    <div class="uploadico">◈</div>
-    <label class="btn" id="uploadBtn" for="file">Analyze WhatsApp export</label>
-    <input id="file" type="file" accept=".txt,text/plain">
-    <h3 id="fileName">Drop your .txt conversation here</h3>
-    <p id="uploadHint">
-      The baseline engine runs locally in your browser. Transformer models are lazy-loaded.
-      Text emojis are analyzed separately from message reactions. Ambiguous reactions are rejected.
-    </p>
-    <div class="reaction-import" style="display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px">
-      <label class="tinybtn reaction-btn" for="reactionFile">💗 Import message reactions</label>
-      <input id="reactionFile" type="file" accept=".json,application/json,.txt,text/plain">
-      <span id="reactionStatus">Optional — reactions are read from a separate structured source.</span>
-    </div>
-    <div style="margin-top:10px">
-      <label class="tinybtn" for="mediaFile">🖼 Add image / video</label>
-      <input id="mediaFile" type="file" accept="image/*,video/*">
-    </div>
-    <span class="privacy">🔒 Privacy-first core analysis</span>
-  </div>
+<section class="upload" id="drop">
+  <div class="ico">◈</div>
+  <label class="btn main" for="file">Analyze WhatsApp export</label>
+  <input id="file" type="file" accept=".txt,text/plain">
+  <h3 id="fileName">Choose a WhatsApp .txt export</h3>
+  <p>Your conversation is analyzed in the browser. No backend is required for the core analysis.</p>
 </section>
 
 <div class="status" id="status"></div>
@@ -388,286 +103,126 @@ input[type=file]{display:none}
 
 <section class="section">
   <div class="cards">
-    <div class="card"><div class="label">MESSAGES</div><div class="value green" id="totalMsgs">0</div></div>
-    <div class="card"><div class="label">WORDS</div><div class="value cyan" id="totalWords">0</div></div>
-    <div class="card"><div class="label">SESSIONS</div><div class="value violet" id="sessionCount">0</div></div>
-    <div class="card"><div class="label">AVG REPLY</div><div class="value gold" id="avgReply">—</div></div>
-    <div class="card"><div class="label">LANGUAGE MIX</div><div class="value" id="language">—</div></div>
-    <div class="card"><div class="label">TEXT EMOJI</div><div class="value pink" id="emojiTotal">0</div></div>
-    <div class="card"><div class="label">REACTIONS</div><div class="value pink" id="reactionTotal">0</div></div>
-    <div class="card"><div class="label">DATA CONFIDENCE</div><div class="value" id="confidence">—</div></div>
+    <div class="card"><div class="label">MESSAGES</div><div class="value green" id="mCount">0</div></div>
+    <div class="card"><div class="label">WORDS</div><div class="value cyan" id="wCount">0</div></div>
+    <div class="card"><div class="label">SESSIONS</div><div class="value violet" id="sCount">0</div></div>
+    <div class="card"><div class="label">AVG REPLY</div><div class="value gold" id="rAvg">—</div></div>
+    <div class="card"><div class="label">LANGUAGE</div><div class="value" id="langMix">—</div></div>
+    <div class="card"><div class="label">EMOJI</div><div class="value pink" id="eCount">0</div></div>
+    <div class="card"><div class="label">QUALITY</div><div class="value" id="qCount">0%</div></div>
   </div>
 </section>
 
 <section class="section panel">
-  <div class="head">
-    <div><h2>Conversation Pulse</h2><p class="sub">One glance. The strongest measurable communication signals.</p></div>
-    <button class="tinybtn" id="semanticBtn">Enable Transformer NLP</button>
-  </div>
-  <div class="pulsegrid">
-    <div id="score" class="score"><div class="scorein"><div class="scoren" id="pulse">0</div><div class="scores">PULSE / 100</div></div></div>
+  <div class="head"><div><h2>Conversation Pulse</h2><p class="sub">Overall observable communication balance.</p></div></div>
+  <div class="pulse">
+    <div id="score" class="score"><div class="scorein"><strong id="pulse">0</strong><span>PULSE / 100</span></div></div>
     <div class="meters" id="meters"></div>
-    <div class="note"><div class="label">DATA CONFIDENCE</div><div class="big" id="confidenceBig">—</div>
-      <small id="confidenceText">Confidence measures parse quality, timing coverage and usable evidence. It is not psychological certainty.</small>
-    </div>
+    <div class="note"><div class="label">DATA QUALITY</div><strong id="qualityBig">—</strong><small>Measures parse, timing and evidence coverage. It is not psychological certainty.</small></div>
   </div>
 </section>
 
 <section class="section panel">
-  <div class="head">
-    <div>
-      <h2>🧠 Conversation Dimension Engine</h2>
-      <p class="sub">Attachment-like, romantic, professional, sports, study, support, jealousy-like and more.</p>
-    </div>
-    <span class="pill">20+ SIGNALS / RADAR</span>
-  </div>
-  <div class="dimension-toolbar" id="dimensionToolbar"></div>
-  <div class="dimension-grid" id="dimensionGrid"></div>
-  <div class="dimension-disclaimer">
-    A dimension score is a measurable signal derived from text, timing and interaction features.
-    “Attachment”, “jealousy”, “distance” and similar names are descriptive labels for observed communication patterns,
-    not psychological diagnoses and not proof of private feelings or intentions.
-  </div>
-  <div class="story" style="margin-top:12px">
-    <h3>🏃 Sports / Fitness is a first-class radar signal</h3>
-    <p>Running, gym, football, basketball, tennis, swimming, cycling, races, pace, training, recovery, performance and planning signals are scored here. The detector uses seed concepts plus broader semantic evidence when Transformer mode is enabled, so the radar is not restricted to this visible vocabulary.</p>
-  </div>
-</section>
-
-<section class="section panel">
-  <div class="head"><div><h2>🧠 Deep Interaction & Recommendation Engine</h2><p class="sub">DLRM-inspired feature interactions and Meaningful Social Interaction scoring.</p></div><span class="pill">DEEP SIGNALS</span></div>
-  <div class="reco-hero">
-    <div class="reco-score"><div class="label">MEANINGFUL SOCIAL INTERACTION</div><strong id="msiScore">—</strong><span id="msiText">Reciprocity + response + content depth + questions + reactions + continuity + recency.</span></div>
-    <div class="reco-score"><div class="label">INTERACTION PROPENSITY</div><strong id="propensityScore">—</strong><span>Behavioral ranking signal, not a prediction of private feelings.</span></div>
-  </div>
-  <div class="reco-grid" id="recoGrid"></div>
-</section>
-
-<section class="section panel">
-  <div class="head"><div><h2>🛡 Content Integrity & Moderation Radar</h2><p class="sub">Harassment-like language, hate-like language, scams, phishing, coercion, suspicious links and misinformation-like claim patterns.</p></div><span class="pill">SAFETY / NLP</span></div>
-  <div id="moderationOverview" class="signalgrid"></div>
-  <div id="moderationEvidence" class="evidence-list"></div>
-  <div class="integrity-alert"><strong>Not a verdict:</strong> these are signals that may deserve review. “Misinformation-like” does not mean the claim is proven false.</div>
-</section>
-
-<section class="section panel">
-  <div class="head"><div><h2>🔬 Open-Vocabulary Discovery</h2><p class="sub">Candidate concepts are discovered from the actual conversation instead of relying only on a fixed dictionary.</p></div><span class="pill">OPEN VOCAB</span></div>
-  <div id="openDiscovery" class="open-discovery"></div>
-</section>
-
-<section class="section panel">
-  <div class="head"><div><h2>🎛 Analysis Profile</h2><p class="sub">Change ranking priorities without changing raw measurements.</p></div></div>
-  <div class="profile-controls">
-    <select id="profileMode"><option value="balanced">Balanced</option><option value="relationship">Relationship</option><option value="professional">Professional</option><option value="sports">Sports / Fitness</option><option value="study">Study / Academic</option><option value="safety">Safety / Moderation</option></select>
-    <input id="profileRecency" type="range" min="0" max="100" value="50" title="Recency weight">
-    <input id="profileEngagement" type="range" min="0" max="100" value="50" title="Engagement weight">
-  </div>
-  <div class="subtxt" style="margin-top:8px">Left slider = recency weight. Right slider = engagement weight.</div>
-</section>
-
-<section class="section panel">
-  <div class="head">
-    <div><h2>🎚 Conversation Navigator</h2><p class="sub">Drag the timeline to inspect the conversation from the beginning to any point.</p></div>
-  </div>
-  <input id="timelineSlider" class="timeline-slider" type="range" min="1" max="100" value="100" step="1">
-  <div id="timelineValue" class="timeline-value">Current: 100%</div>
-  <div id="timelineMetrics" class="timeline-grid"></div>
-</section>
-
-<section class="section panel">
-  <div class="head">
-    <div><h2>🧬 Transformer Semantic Intelligence</h2><p class="sub">Embeddings + semantic similarity + zero-shot classification when supported.</p></div>
-    <span class="pill">LAZY LOADED</span>
-  </div>
-  <div class="semantic-layout">
-    <div>
-      <div class="semantic-score-card">
-        <div class="semantic-number" id="semanticConfidence">—</div>
-        <div><strong>Semantic confidence</strong><small>The model layer is optional. Core metrics remain available without it.</small></div>
-      </div>
-      <div class="semantic-labels" id="semanticLabels"></div>
-    </div>
-    <div class="chartbox" style="height:320px"><canvas id="semanticChart"></canvas></div>
-  </div>
-</section>
-
-<section class="section panel">
-  <div class="head">
-    <div><h2>Social Signal Engine</h2><p class="sub">Recency, interaction continuity, reactions and content signals adapted to chat behavior.</p></div>
-    <span class="pill">NOT PROPRIETARY PLATFORM CODE</span>
-  </div>
-  <div class="social-hero">
-    <div>
-      <div class="rank-list" id="socialRankList"></div>
-      <div class="rank-disclaimer">The ranking layer uses generic observable interaction principles. It does not reproduce any hidden social-platform algorithm.</div>
-    </div>
-    <div>
-      <div style="font-size:9px;color:#71869a">MESSAGE REACTION INTELLIGENCE</div>
-      <div id="reactionInsight" class="story" style="margin-top:8px"><h3>No reaction layer loaded</h3><p>Import a reaction dataset that identifies target messages. Standard TXT exports generally cannot do that reliably.</p></div>
-      <div style="font-size:9px;color:#71869a;margin-top:14px">OPEN-VOCABULARY SIGNALS</div>
-      <div class="open-vocab" id="openVocabGrid" style="margin-top:8px"></div>
-    </div>
-  </div>
-</section>
-
-<section class="section panel">
-  <div class="head"><div><h2>Reaction Integrity</h2><p class="sub">The app refuses ambiguous reaction mapping instead of silently assigning a reaction to the wrong message.</p></div></div>
-  <div class="integrity-grid" id="integrityGrid"></div>
-</section>
-
-<section class="section panel">
-  <div class="head">
-    <div><h2>Data Quality</h2><p class="sub">A product-level quality report for parsing, timing, reactions and analysis coverage.</p></div>
-  </div>
-  <div class="quality-grid" id="qualityGrid"></div>
+  <div class="head"><div><h2>🧠 Conversation Dimensions</h2><p class="sub">Relationship, professional, study, sports, support and more.</p></div></div>
+  <div class="dimension-toolbar" id="dimToolbar"></div>
+  <div class="dimension-grid" id="dimGrid"></div>
+  <div class="insight"><b>SPORTS / FITNESS</b><p>Running, gym, football, basketball, tennis, swimming, training, races, pace and fitness vocabulary are explicitly analyzed.</p></div>
 </section>
 
 <section class="section grid2">
   <div class="panel">
-    <div class="head"><div><h2>Who drives the conversation?</h2><p class="sub">Observable initiation + response behavior.</p></div></div>
-    <div id="balance" class="list"></div>
+    <div class="head"><div><h2>Participants</h2><p class="sub">Message share and activity.</p></div></div>
+    <div id="participants"></div>
   </div>
   <div class="panel">
-    <div class="head"><div><h2>What does it suggest?</h2><p class="sub">Useful interpretation, not mind-reading.</p></div></div>
-    <div id="insights"></div>
+    <div class="head"><div><h2>Relationship Pattern</h2><p class="sub">Observable reciprocity.</p></div></div>
+    <div id="relation"></div>
   </div>
 </section>
 
 <section class="section grid3">
   <div class="panel">
-    <div class="head"><div><h2>Participants</h2><p class="sub">Share · starts · questions</p></div></div>
-    <div id="participants" class="list"></div>
+    <div class="head"><div><h2>Language DNA</h2></div></div>
+    <div id="languages" class="signalgrid"></div>
   </div>
   <div class="panel">
-    <div class="head"><div><h2>Language DNA</h2><p class="sub">Arabic · English · Hebrew · Russian · Italian · Spanish</p></div></div>
-    <div id="languageDNA" class="signalgrid"></div>
-  </div>
-  <div class="panel">
-    <div class="head"><div><h2>Message tone</h2><p class="sub">Lexical evidence only.</p></div></div>
+    <div class="head"><div><h2>Message Tone</h2></div></div>
     <div id="tone" class="signalgrid"></div>
   </div>
-</section>
-
-<section class="section grid2">
   <div class="panel">
-    <div class="head"><div><h2>Initiation vs Response</h2><p class="sub">Who starts, who answers, who keeps the exchange going?</p></div></div>
-    <div class="chartbox"><canvas id="initChart"></canvas></div>
-  </div>
-  <div class="panel">
-    <div class="head"><div><h2>Conversation Energy</h2><p class="sub">Message volume across time.</p></div></div>
-    <div class="chartbox"><canvas id="energyChart"></canvas></div>
+    <div class="head"><div><h2>Quick Insights</h2></div></div>
+    <div id="insights"></div>
   </div>
 </section>
 
 <section class="section grid2">
   <div class="panel">
-    <div class="head"><div><h2>Emoji DNA</h2><p class="sub">Emoji typed in message text only — not reactions.</p></div></div>
+    <div class="head"><div><h2>Initiation vs Response</h2></div></div>
+    <div class="chart"><canvas id="initChart"></canvas></div>
+  </div>
+  <div class="panel">
+    <div class="head"><div><h2>Conversation Energy</h2></div></div>
+    <div class="chart"><canvas id="energyChart"></canvas></div>
+  </div>
+</section>
+
+<section class="section grid2">
+  <div class="panel">
+    <div class="head"><div><h2>Emoji DNA</h2><p class="sub">Only emoji typed in messages.</p></div></div>
     <div id="emojiWrap" class="emojiwrap"></div>
-    <div class="chartbox sm" style="margin-top:10px"><canvas id="emojiChart"></canvas></div>
+    <div class="chart sm" style="margin-top:10px"><canvas id="emojiChart"></canvas></div>
   </div>
   <div class="panel">
-    <div class="head"><div><h2>Conflict Radar</h2><p class="sub">Detected friction clusters — not proof of a fight.</p></div></div>
-    <div id="conflictSummary"></div>
-    <div class="chartbox sm" style="margin-top:10px"><canvas id="conflictChart"></canvas></div>
+    <div class="head"><div><h2>Conflict Radar</h2><p class="sub">Language-friction clusters.</p></div></div>
+    <div id="conflict"></div>
+    <div class="chart sm" style="margin-top:10px"><canvas id="conflictChart"></canvas></div>
   </div>
 </section>
 
 <section class="section panel">
-  <div class="head"><div><h2>Topic Radar</h2><p class="sub">Keyword evidence, optionally re-ranked by semantic similarity.</p></div></div>
+  <div class="head"><div><h2>Topic Radar</h2></div></div>
   <div id="topics"></div>
 </section>
 
 <section class="section panel">
-  <div class="head"><div><h2>How the relationship pattern moves</h2><p class="sub">Changes in reciprocity, response speed, message depth and friction.</p></div></div>
-  <div class="chartbox"><canvas id="trendChart"></canvas></div>
-</section>
-
-
-
-<section class="section panel">
-  <div class="head">
-    <div><h2>Multimodal Intelligence</h2><p class="sub">Analyze an image or a representative video keyframe alongside the conversation context.</p></div>
-    <span class="pill">VISION</span>
-  </div>
-  <div id="mediaResults"><div class="story"><h3>No media loaded</h3><p>Add an image or video from the upload card to activate the optional vision layer.</p></div></div>
+  <div class="head"><div><h2>Conversation Navigator</h2><p class="sub">Inspect the conversation up to any point.</p></div></div>
+  <input id="timeline" class="slider" type="range" min="1" max="100" value="100">
+  <div style="margin:8px 0;color:var(--cyan);font:10px monospace" id="timelineLabel">100%</div>
+  <div id="timelineMetrics" class="timeline"></div>
 </section>
 
 <section class="section panel">
-  <div class="head">
-    <div><h2>AI Story</h2><p class="sub">Uses measured features rather than sending the entire raw chat by default.</p></div>
-    <button class="tinybtn" id="aiBtn">Generate AI Story <span style="color:#d8bdff">PRO</span></button>
-  </div>
-  <div id="story" class="story"><h3>Start with the local engine.</h3><p>The baseline engine already measures participation, response timing, language mix, conflict, domains, emojis and reactions.</p></div>
+  <div class="head"><div><h2>Trend</h2><p class="sub">Message depth, response time and positive signals.</p></div></div>
+  <div class="chart"><canvas id="trendChart"></canvas></div>
 </section>
 
-<section class="section pay">
-  <div>
-    <h3>⚡ ConvoLens Pro</h3>
-    <p>Advanced semantic analysis, multi-chat comparison, saved profiles, AI Story, longitudinal tracking, exportable reports and premium conversation intelligence.</p>
-    <div class="progrid">
-      <div class="profeature"><strong>🧠 Semantic NLP</strong><span>Multilingual embeddings and zero-shot signals instead of keywords only.</span></div>
-      <div class="profeature"><strong>🧩 Compare chats</strong><span>See whether a communication pattern is conversation-specific.</span></div>
-      <div class="profeature"><strong>📈 Longitudinal</strong><span>Track how communication domains change over time.</span></div>
-    </div>
-  </div>
-  <button class="btn pro" id="proBtn">Unlock Pro</button>
+<section class="section panel">
+  <div class="head"><div><h2>AI / Semantic Layer</h2><p class="sub">Optional Transformer engine. Core analysis does not depend on it.</p></div><button class="tiny" id="transformerBtn">Enable Transformer</button></div>
+  <div id="semanticState" class="insight"><b>LOCAL ENGINE</b><p>The local engine is already active. Transformer mode is optional.</p></div>
 </section>
 
-
-
-<div class="foot">
-  ConvoLens reports observable communication signals. A higher attachment-like score does not mean a person is clinically attached;
-  a higher jealousy-like score does not prove jealousy; a sports score means sports-related communication was detected.
-  When evidence is insufficient or ambiguous, the product reports uncertainty instead of inventing a conclusion.
-</div>
+<div class="foot">ConvoLens analyzes observable communication patterns. Scores such as attachment-like, jealousy-like or sports-related signals are descriptive data signals and are not proof of private thoughts, diagnosis or intention.</div>
 
 </main>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<div class="modal" id="proModal">
-  <div class="modalbox">
-    <div class="modalhead"><div><div class="kicker">CONVOLENS PRO</div><h2 style="margin:5px 0 0">From dashboard to intelligence.</h2></div><button class="tinybtn" id="closeModal">✕</button></div>
-    <div class="price">$9.99 / month</div>
-    <ul>
-      <li>Semantic multilingual NLP + smarter topic discovery.</li>
-      <li>AI Story and advanced relationship-pattern summaries.</li>
-      <li>Conflict timeline + anomaly detection.</li>
-      <li>Compare multiple conversations.</li>
-      <li>Saved profiles + longitudinal tracking.</li>
-      <li>Exportable reports.</li>
-    </ul>
-    <div class="small">The final amount, taxes and payment methods are handled by Stripe Checkout. Do not enter card details into ConvoLens itself.</div>
-    <div class="rowBtns" style="margin-top:15px"><button class="btn dark" id="cancelPro">Not now</button><button class="btn pro" id="checkoutBtn">Continue to secure checkout</button></div>
-  </div>
 </div>
 
 <script>
 "use strict";
 
-/* =========================================================
-   PRODUCT STATE
-========================================================= */
-const $ = id => document.getElementById(id);
-let APP_LANG = "en";
-let LAST = null;
-let charts = {};
-let NEURAL = null;
-let EMBEDDER = null;
-let ZERO_SHOT = null;
-let IMAGE_ZERO_SHOT = null;
-let IMAGE_CAPTIONER = null;
-let NEURAL_LOADING = false;
-let REACTION_DATA = [];
-let REACTION_STATS = {total:0,mapped:0,ambiguous:0,orphan:0};
-let MEDIA_DATA = null;
-let ANALYSIS_PROFILE = {mode:"balanced",recency:0.5,engagement:0.5};
-let DYNAMIC_VOCAB = [];
+const $=id=>document.getElementById(id);
+let LAST=null,APP_LANG="en",charts={};
 
 const I18N={
-  en:{lang:"العربية",title:'See the <span class="grad">signals</span> behind the messages.',desc:"Upload a WhatsApp export and turn raw messages into measurable communication patterns across relationships, professional behavior, study, sports, support, conflict and more.",upload:"Analyze WhatsApp export",file:"Drop your .txt conversation here"},
-  ar:{lang:"English",title:'شاهد <span class="grad">الإشارات</span> خلف الرسائل.',desc:"ارفع محادثة WhatsApp وحوّلها إلى تحليل واسع: التفاعل، التعلّق السلوكي، الرومانسية، المهنية، الدراسة، الرياضة، الدعم، الخلاف والمواضيع والإيموجي والـReactions.",upload:"حلّل محادثة WhatsApp",file:"ضع ملف المحادثة .txt هنا"}
+  en:{
+    lang:"العربية",
+    title:'See the <span class="grad">signals</span> behind the messages.',
+    desc:"Upload a WhatsApp export and analyze participation, timing, language, topics, sports, relationships, conflict and interaction signals."
+  },
+  ar:{
+    lang:"English",
+    title:'شاهد <span class="grad">الإشارات</span> خلف الرسائل.',
+    desc:"ارفع محادثة WhatsApp وحلل المشاركة، سرعة الرد، اللغات، المواضيع، الرياضة، العلاقات، الخلاف والتفاعل."
+  }
 };
 
 function applyLang(){
@@ -675,1180 +230,561 @@ function applyLang(){
   document.documentElement.lang=APP_LANG;
   document.documentElement.dir=APP_LANG==="ar"?"rtl":"ltr";
   $("langBtn").textContent=t.lang;
-  $("heroTitle").innerHTML=t.title;
-  $("heroDesc").textContent=t.desc;
-  $("uploadBtn").textContent=t.upload;
-  if($("dashboard").style.display==="block"&&LAST) render(LAST);
+  $("title").innerHTML=t.title;
+  $("desc").textContent=t.desc;
 }
-$("langBtn").onclick=()=>{APP_LANG=APP_LANG==="en"?"ar":"en";applyLang()};
 
-/* =========================================================
-   SAFE HELPERS
-========================================================= */
-function normalize(text){
-  return String(text||"").replace(/^\uFEFF/,"").replace(/\r\n?/g,"\n").replace(/[\u200E\u200F\u202A-\u202E\u2066-\u2069]/g,"");
-}
-function esc(s){
-  return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
-}
-function clamp(n,min=0,max=100){return Math.max(min,Math.min(max,n))}
+$("langBtn").onclick=()=>{
+  APP_LANG=APP_LANG==="en"?"ar":"en";
+  applyLang();
+};
+
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function clamp(n,a=0,b=100){n=Number(n);return Number.isFinite(n)?Math.max(a,Math.min(b,n)):a}
 function mean(a){return a.length?a.reduce((x,y)=>x+y,0)/a.length:0}
-function pct(a,b){return b?(a/b)*100:0}
-function duration(ms){
-  if(!Number.isFinite(ms)||ms<0)return "—";
-  const total=Math.round(ms/60000),h=Math.floor(total/60),m=total%60;
-  if(total<1)return "<1m";
-  return h?`${h}h${m?` ${m}m`:""}`:`${m}m`;
-}
-function dateLabel(ts){
-  return new Date(ts).toLocaleDateString(APP_LANG==="ar"?"ar":"en-US",{month:"short",day:"numeric",year:"numeric"});
+function pct(a,b){return b?a/b*100:0}
+function duration(ms){if(!Number.isFinite(ms)||ms<0)return"—";const m=Math.round(ms/60000);if(m<1)return"<1m";const h=Math.floor(m/60);return h?`${h}h ${m%60}m`:`${m}m`}
+function tokenize(t){return String(t||"").toLowerCase().match(/[\p{L}\p{N}’']+/gu)||[]}
+function words(t){return tokenize(t).length}
+function question(t){return/[?؟]/u.test(t)}
+function lex(t,list){const x=String(t).toLowerCase();return list.reduce((s,k)=>s+(x.includes(k.toLowerCase())?1:0),0)}
+
+const LANGUAGE_WORDS={
+  English:["the","you","and","what","this","that","are","have","with","for","not","your","today","tomorrow"],
+  Arabic:["مرحبا","شكرا","اليوم","غدا","بكرا","أنا","انا","أنت","انت","هذا","كيف","ماذا","جدا","نعم","لا"],
+  Hebrew:["שלום","תודה","היום","מחר","אני","אתה","את","זה","איך","מה","מאוד","כן","לא"],
+  Russian:["привет","спасибо","сегодня","завтра","я","ты","это","как","что","очень","да","нет"],
+  Italian:["ciao","grazie","amore","oggi","domani","come","sono","sei","non","dove"],
+  Spanish:["hola","gracias","amor","hoy","mañana","como","soy","eres","para"]
+};
+
+function detectLang(t){
+  const c={
+    Arabic:(t.match(/[\u0600-\u06ff]/g)||[]).length,
+    Hebrew:(t.match(/[\u0590-\u05ff]/g)||[]).length,
+    Russian:(t.match(/[\u0400-\u04ff]/g)||[]).length,
+    English:(t.match(/[A-Za-z]/g)||[]).length
+  };
+  const tok=tokenize(t);
+  for(const[lang,list]of Object.entries(LANGUAGE_WORDS))c[lang]=(c[lang]||0)+tok.filter(x=>list.includes(x)).length*5;
+  const arr=Object.entries(c).sort((a,b)=>b[1]-a[1]);
+  if(!arr[0]||!arr[0][1])return"Unknown";
+  if((arr[1]?.[1]||0)>arr[0][1]*.45)return"Mixed";
+  return arr[0][0];
 }
 
-/* =========================================================
-   WHATSAPP PARSER
-========================================================= */
-const MESSAGE_PATTERNS=[
-  /^(?:\[)?(\d{1,4}[\/.\-]\d{1,2}[\/.\-]\d{1,4}),?\s+(\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM|am|pm)?)\]?\s*[-–—]\s*([^:]+):\s?(.*)$/i,
-  /^(?:\[)?(\d{1,4}[\/.\-]\d{1,2}[\/.\-]\d{1,4}),?\s+(\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM|am|pm)?)\]?\s+([^:]+):\s?(.*)$/i
+function graphemes(t){
+  if(Intl.Segmenter){
+    const s=new Intl.Segmenter(undefined,{granularity:"grapheme"});
+    return[...s.segment(String(t||""))].map(x=>x.segment);
+  }
+  return[...String(t||"")];
+}
+
+function emojis(t){return graphemes(t).filter(g=>/\p{Extended_Pictographic}|\uFE0F/u.test(g))}
+
+const POS=[
+  "good","great","love","happy","amazing","nice","thanks","perfect","sweet","miss you",
+  "حلو","جميل","ممتاز","رائع","أحب","سعيد","شكرا","تمام","اشتقت",
+  "מדהים","מעולה","תודה","שמח","אוהב","מתגעגע",
+  "прекрасно","люблю","спасибо","скучаю",
+  "amore","grazie","felice","amor","gracias","feliz"
 ];
-const ANY_ENTRY_RE=/^(?:\[)?\d{1,4}[\/.\-]\d{1,2}[\/.\-]\d{1,4},?\s+\d{1,2}:\d{2}/;
+
+const NEG=[
+  "bad","sad","angry","hate","problem","worried","upset","terrible","leave me","shut up",
+  "سيء","حزين","زعلان","غاضب","كره","مشكلة","قلق","اتركني","اسكت",
+  "עצוב","כועס","שונא","בעיה","עזוב אותי","שתוק",
+  "плохо","грустно","злюсь","ненавижу","проблема","отстань",
+  "triste","arrabbiato","odio","problema"
+];
+
+const CONFLICT=[
+  "angry","mad","hate","problem","fight","fighting","argue","argument","annoying","annoyed","upset","leave me","shut up","whatever",
+  "غاضب","معصب","زعلان","كره","مشكلة","شجار","خلاف","مزعج","اتركني","اسكت",
+  "כועס","ריב","מריבה","בעיה","מעצבן","עזוב אותי","שתוק",
+  "злюсь","ссора","ругаться","проблема","бесишь","отстань",
+  "pelea","enojado","problema","molesto"
+];
+
+const APOLOGY=[
+  "sorry","apologize","forgive","آسف","سامحني","معلش","סליחה","מצטער","извини","прости","scusa","perdona","perdón"
+];
+
+const PATTERNS=[
+/^(?:\[)?(\d{1,4}[\/.\-]\d{1,2}[\/.\-]\d{1,4}),?\s+(\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM|am|pm)?)\]?\s*[-–—]\s*([^:]+):\s?(.*)$/i,
+/^(?:\[)?(\d{1,4}[\/.\-]\d{1,2}[\/.\-]\d{1,4}),?\s+(\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM|am|pm)?)\]?\s+([^:]+):\s?(.*)$/i
+];
+
+function parseDate(d,t){
+  const p=String(d).split(/[\/.\-]/).map(Number);
+  if(p.length!==3)return NaN;
+  let a=p[0],b=p[1],y=p[2]<100?2000+p[2]:p[2],day,month;
+  if(a>12){day=a;month=b}else if(b>12){month=a;day=b}else{day=a;month=b}
+  let z=String(t).trim().toUpperCase(),ap=z.match(/\b(AM|PM)$/),q=z.replace(/\s*(AM|PM)$/,"").split(":").map(Number);
+  let h=q[0],m=q[1],s=q[2]||0;
+  if(ap){if(ap[1]==="PM"&&h<12)h+=12;if(ap[1]==="AM"&&h===12)h=0}
+  return new Date(y,month-1,day,h,m,s).getTime();
+}
 
 function parseMessages(text){
-  const lines=normalize(text).split("\n");
-  const out=[];
-  let cur=null;
-  for(const raw of lines){
-    const line=raw.trimEnd();
-    let match=null;
-    for(const re of MESSAGE_PATTERNS){
-      const z=line.match(re);
-      if(z){match=z;break}
-    }
-    if(match){
-      if(cur)out.push(cur);
-      cur={date:match[1],time:match[2],sender:match[3].trim(),text:match[4].trim()};
-      continue;
-    }
-    if(ANY_ENTRY_RE.test(line)){if(cur)out.push(cur);cur=null;continue}
-    if(cur&&line.trim())cur.text+=(cur.text?"\n":"")+line.trim();
+  const out=[];let cur=null;
+  for(const raw of String(text).replace(/\r\n?/g,"\n").split("\n")){
+    const line=raw.trimEnd();let m=null;
+    for(const re of PATTERNS){const x=line.match(re);if(x){m=x;break}}
+    if(m){if(cur)out.push(cur);cur={date:m[1],time:m[2],sender:m[3].trim(),text:m[4].trim()}}
+    else if(cur&&line.trim())cur.text+=(cur.text?"\n":"")+line.trim();
   }
   if(cur)out.push(cur);
   return out;
 }
-function parseDate(date,time){
-  const p=String(date).split(/[\/.\-]/).map(Number);
-  if(p.length!==3)return NaN;
-  let a=p[0],b=p[1],c=p[2];
-  c=c<100?2000+c:c;
-  let day,month;
-  if(a>12){day=a;month=b}else if(b>12){month=a;day=b}else{day=a;month=b}
-  let z=String(time).trim().replace(/\s+/g," ").toUpperCase();
-  const ap=z.match(/\b(AM|PM)$/);
-  const q=z.replace(/\s*(AM|PM)$/i,"").split(":").map(Number);
-  let h=q[0],m=q[1],s=q[2]||0;
-  if(ap){if(ap[1]==="PM"&&h<12)h+=12;if(ap[1]==="AM"&&h===12)h=0}
-  const d=new Date(c,month-1,day,h,m,s).getTime();
-  return Number.isFinite(d)?d:NaN;
-}
 
-/* =========================================================
-   TOKENIZATION + LANGUAGE ENGINE
-========================================================= */
-function tokenize(text){return String(text||"").toLowerCase().normalize("NFKC").match(/[\p{L}\p{N}’']+/gu)||[]}
-function countWords(text){return tokenize(text).length}
-function isQuestion(t){return /[?؟]/u.test(t)}
-
-const LANG_PATTERNS={
-  Arabic:/[\u0600-\u06FF]/g,
-  Hebrew:/[\u0590-\u05FF]/g,
-  Russian:/[\u0400-\u04FF]/g,
-  English:/[A-Za-z]/g
+const TOPICS={
+  "Love / Connection":["love","relationship","miss you","kiss","hug","date","حب","أحب","اشتقت","قبلة","حضن","موعد","אהבה","מתגעגע","דייט","люблю","скучаю"],
+  "Work / Study":["work","office","meeting","project","job","exam","study","عمل","مكتب","اجتماع","مشروع","جامعة","دراسة","امتحان","עבודה","משרד","פגישה","פרויקט","לימודים","מבחן","работа","встреча","проект","экзамен"],
+  "Sports / Fitness":["run","running","runner","gym","workout","training","football","soccer","basketball","tennis","swim","marathon","race","pace","fitness","جري","ركض","عداء","جيم","تمرين","تدريب","كرة قدم","كرة سلة","تنس","سباحة","ماراثون","ריצה","חדר כושר","אימון","כדורגל","כדורסל","טניס","שחייה","מרתון","бег","тренировка","футбол","баскетбол","теннис","плавание","марафон"],
+  Family:["family","mother","mom","father","dad","brother","sister","عائلة","أمي","أبي","أخ","أخت","משפחה","אמא","אבא","אח","אחות","семья","мама","папа","брат","сестра"],
+  Travel:["travel","trip","flight","airport","hotel","vacation","passport","train","سفر","رحلة","مطار","فندق","إجازة","جواز","قطار","טיול","טיסה","מלון","חופשה","דרכון","רכבת","поездка","самолет","аэропорт","отель","отпуск"],
+  Food:["food","eat","restaurant","dinner","lunch","coffee","pizza","أكل","مطعم","غداء","عشاء","قهوة","بيتزا","אוכל","מסעדה","ארוחה","קפה","еда","ресторан","ужин","кофе"],
+  Plans:["tomorrow","today","tonight","later","weekend","plan","meet","بكرا","غدا","اليوم","الليلة","خطة","موعد","מחר","היום","תוכנית","פגישה","завтра","сегодня","план"],
+  Money:["money","price","pay","salary","cost","buy","invoice","bank","مال","سعر","دفع","راتب","تكلفة","شراء","فاتورة","بنك","כסף","מחיר","משכורת","לקנות","בנק","деньги","цена","зарплата","купить","банк"]
 };
-const WORD_LANG={
-  Italian:["ciao","grazie","amore","perché","perche","come","oggi","domani","buongiorno","buona","sono","sei","anche","con","non","dove","per"],
-  Spanish:["hola","gracias","amor","porque","cómo","como","hoy","mañana","buenos","buenas","soy","eres","también","con","no","donde","para"],
-  English:["the","you","and","what","this","that","are","with","have","not","for","can","just","your","love","today","tomorrow"],
-  Russian:["привет","спасибо","любовь","почему","сегодня","завтра","я","ты","это","как","что","очень","нет","да","где","буду"],
-  Hebrew:["שלום","תודה","אהבה","למה","היום","מחר","אני","אתה","את","זה","איך","מה","מאוד","לא","כן","איפה"],
-  Arabic:["مرحبا","شكرا","حب","لماذا","اليوم","غدا","بكرا","أنا","انا","أنت","انت","هذا","كيف","ماذا","جدا","لا","نعم","وين","أين"]
+
+const DIMENSIONS={
+  Attachment:["miss you","where are you","اشتقت","وينك","طمني","מתגעגע","איפה אתה","скучаю"],
+  Romantic:["love","kiss","hug","date","حبي","حب","قبلة","حضن","אהבה","נשיקה","дата"],
+  Friendship:["friend","buddy","bro","صديق","صاحبي","חבר","друг"],
+  Professional:["meeting","project","office","client","work","اجتماع","مشروع","مكتب","شغل","פגישה","עבודה"],
+  Study:["exam","test","assignment","lecture","study","امتحان","اختبار","واجب","جامعة","מבחן","לימודים"],
+  "Sports / Fitness":TOPICS["Sports / Fitness"],
+  Support:["help","support","don't worry","proud of you","ساعدك","لا تقلق","فخور","עזרה","גאה","помогу"],
+  Humor:["haha","lol","funny","joke","هههه","مزحة","חחח","смешно"],
+  Jealousy:["who is that","who were you with","another girl","another guy","من هاي","مع مين","מי זאת","עם מי","с кем"],
+  Distance:["leave me","don't talk","stop texting","busy","اتركني","مشغول","لا تحكي معي","עזוב אותי","עסוק"],
+  Planning:["tomorrow","today","later","weekend","plan","meet","بكرا","اليوم","خطة","موعد","מחר"],
+  Finance:["money","price","pay","salary","buy","سعر","دفع","راتب","شراء","כסף"],
+  Travel:TOPICS.Travel,
+  Family:TOPICS.Family,
+  Wellbeing:["tired","sleep","energy","rest","stress","تعبان","نوم","طاقة","راحة","ضغط","עייף","שינה"],
+  Interest:["tell me","what happened","why","how","really","احكيلي","شو صار","ليش","كيف","למה"],
+  Repair:APOLOGY,
+  Conflict:CONFLICT,
+  Affection:["love","miss you","sweet","cute","حلو","جميل","اشتقت","מתגעגע","люблю"]
 };
-function detectLanguage(text){
-  const chars={};
-  for(const [k,re] of Object.entries(LANG_PATTERNS))chars[k]=(String(text).match(re)||[]).length;
-  const toks=tokenize(text),wordScores={};
-  for(const [lang,list] of Object.entries(WORD_LANG)){
-    const set=new Set(list);
-    wordScores[lang]=toks.reduce((s,w)=>s+(set.has(w)?1:0),0);
-  }
-  const combined={Arabic:chars.Arabic+wordScores.Arabic*6,Hebrew:chars.Hebrew+wordScores.Hebrew*6,Russian:chars.Russian+wordScores.Russian*6,English:chars.English+wordScores.English*4,Italian:wordScores.Italian*9,Spanish:wordScores.Spanish*9};
-  const top=Object.entries(combined).sort((a,b)=>b[1]-a[1]);
-  if(!top[0]||top[0][1]===0)return "Unknown";
-  if((top[1]?.[1]||0)>=top[0][1]*.42)return "Mixed";
-  return top[0][0];
-}
 
-/* =========================================================
-   EMOJI ENGINE — GRAPHEME SAFE
-   A message emoji is NOT a reaction.
-========================================================= */
-function splitGraphemes(text){
-  if(window.Intl&&Intl.Segmenter){
-    const seg=new Intl.Segmenter(undefined,{granularity:"grapheme"});
-    return [...seg.segment(String(text||""))].map(x=>x.segment);
-  }
-  return [...String(text||"")];
-}
-function isEmojiGrapheme(g){
-  if(!g)return false;
-  const chars=[...g];
-  const pictographic=/\p{Extended_Pictographic}/u.test(g);
-  const emojiPresentation=/\uFE0F/u.test(g);
-  const regional=chars.length===2&&chars.every(ch=>/\p{Regional_Indicator}/u.test(ch));
-  return pictographic||emojiPresentation||regional;
-}
-function getEmojis(text){return splitGraphemes(text).filter(isEmojiGrapheme)}
-function emojiStats(messages){
-  const byEmoji={},bySender={};
-  for(const m of messages){
-    for(const e of getEmojis(m.text)){
-      byEmoji[e]=(byEmoji[e]||0)+1;
-      bySender[m.sender]??={};
-      bySender[m.sender][e]=(bySender[m.sender][e]||0)+1;
-    }
-  }
-  return {top:Object.entries(byEmoji).sort((a,b)=>b[1]-a[1]).slice(0,15),bySender,total:Object.values(byEmoji).reduce((a,b)=>a+b,0),unique:Object.keys(byEmoji).length};
-}
-
-/* =========================================================
-   REACTION ENGINE — STRICT TARGET RESOLUTION
-   Never use fuzzy text includes() to assign a reaction.
-========================================================= */
-function parseReactionLines(text){
-  const out=[];
-  for(const line of normalize(text).split("\n")){
-    const m=line.match(/^\s*(\d+)\s*[|,]\s*(.*?)\s*[|,]\s*(\p{Extended_Pictographic}+(?:️)?)\s*(?:[|,]\s*(.*))?$/u);
-    if(m)out.push({messageIndex:Number(m[1]),reactor:m[2],emoji:m[3],timestamp:m[4]||null});
-  }
-  return out;
-}
-function normalizeReactionData(data){
-  const arr=Array.isArray(data)?data:(data?.reactions||data?.messages||[]);
-  const out=[];
-  const walk=item=>{
-    if(!item||typeof item!=="object")return;
-    if(item.emoji||item.reactionText){
-      out.push({
-        messageIndex:Number.isFinite(Number(item.messageIndex))?Number(item.messageIndex):null,
-        messageId:item.messageId||item.msgId||item.targetMessageId||item.message_id||null,
-        reactor:item.reactor||item.sender||item.senderName||item.from||item.senderUserJid||"Unknown",
-        emoji:item.emoji||item.reactionText||"",
-        timestamp:item.timestamp||null,
-        messageText:item.messageText||item.targetText||item.originalText||null,
-        targetDate:item.targetDate||item.date||null,
-        targetTime:item.targetTime||item.time||null
-      });
-    }
-    if(Array.isArray(item.senders))item.senders.forEach(x=>walk({...x,emoji:x.reactionText||item.aggregateEmoji||x.emoji,messageId:x.msgId||item.msgId||item.messageId}));
-    if(Array.isArray(item.reactions))item.reactions.forEach(walk);
-  };
-  arr.forEach(walk);
-  return out.filter(x=>x.emoji);
-}
-function reactionWeight(e){
-  const x=e||"";
-  if(/❤️|♥️|💖|💗|💓|💞|💕|💘|💝|😍|🥰/u.test(x))return 1.7;
-  if(/😂|🤣|😹/u.test(x))return 1.35;
-  if(/👍|👌|👏|🙏|✅/u.test(x))return 1.0;
-  if(/🔥|💯|😎|🤩/u.test(x))return 1.45;
-  if(/😮|😲|🤯|😢|😭|😡|🤬|👎/u.test(x))return .75;
-  return 1.0;
-}
-function buildExactTextMap(messages){
-  const map=new Map();
-  for(let i=0;i<messages.length;i++){
-    const key=String(messages[i].text).trim();
-    if(!map.has(key))map.set(key,[]);
-    map.get(key).push(i);
-  }
-  return map;
-}
-function attachReactions(r){
-  r.messages.forEach(m=>{m.reactions=[];m.reactionScore=0});
-  const exactMap=buildExactTextMap(r.messages);
-  REACTION_STATS={total:REACTION_DATA.length,mapped:0,ambiguous:0,orphan:0};
-  for(const rx of REACTION_DATA){
-    let idx=null;
-    /* 1) Strongest: stable messageId */
-    if(rx.messageId){
-      idx=r.messages.findIndex(m=>m.messageId&&String(m.messageId)===String(rx.messageId));
-    }
-    /* 2) Explicit target index */
-    if(idx===null&&Number.isInteger(rx.messageIndex)&&r.messages[rx.messageIndex])idx=rx.messageIndex;
-    /* 3) Exact unique target text; duplicate text is rejected */
-    if(idx===null&&rx.messageText){
-      const hits=exactMap.get(String(rx.messageText).trim())||[];
-      if(hits.length===1)idx=hits[0];
-      else if(hits.length>1){REACTION_STATS.ambiguous++;continue}
-    }
-    /* 4) Explicit target timestamp, constrained to 90 seconds */
-    if(idx===null&&rx.targetDate&&rx.targetTime){
-      const ts=parseDate(rx.targetDate,rx.targetTime);
-      if(Number.isFinite(ts)){
-        let best=Infinity,bestI=null;
-        for(let i=0;i<r.messages.length;i++){
-          const d=Math.abs(r.messages[i].ts-ts);
-          if(d<=90000&&d<best){best=d;bestI=i}
-        }
-        idx=bestI;
-      }
-    }
-    if(idx===null){REACTION_STATS.orphan++;continue}
-    const rec={...rx,weight:reactionWeight(rx.emoji)};
-    r.messages[idx].reactions.push(rec);
-    r.messages[idx].reactionScore+=rec.weight;
-    REACTION_STATS.mapped++;
-  }
-  r.reactionTotal=r.messages.reduce((s,m)=>s+m.reactions.length,0);
-  r.reactionByEmoji={};
-  r.reactionBySender={};
-  for(const m of r.messages){
-    for(const x of m.reactions){
-      r.reactionByEmoji[x.emoji]=(r.reactionByEmoji[x.emoji]||0)+1;
-      r.reactionBySender[x.reactor]??={};
-      r.reactionBySender[x.reactor][x.emoji]=(r.reactionBySender[x.reactor][x.emoji]||0)+1;
-    }
-  }
-}
-
-/* =========================================================
-   LEXICON
-========================================================= */
-const POS=["good","great","love","happy","amazing","nice","thanks","thank","glad","perfect","awesome","sweet","miss you","حلو","جميل","ممتاز","رائع","أحب","احب","سعيد","شكرا","شكر","تمام","اشتقت","مشتاق","מדהים","מעולה","תודה","שמח","אוהב","מתגעגע","прекрасно","люблю","спасибо","скучаю","отлично","amore","grazie","felice","adoro","mi manchi","amor","gracias","feliz","te quiero","te extraño"];
-const NEG=["bad","sad","angry","hate","sorry","problem","worried","upset","terrible","leave me","shut up","whatever","سيء","حزين","زعلان","غاضب","كره","آسف","مشكلة","خايف","قلق","تعبان","خلص","اتركني","اسكت","עצוב","כועס","שונא","בעיה","סליחה","מודאג","עזוב אותי","שתוק","плохо","грустно","злюсь","ненавижу","проблема","извини","отстань","замолчи","triste","arrabbiato","odio","problema","scusa","lasciami","triste","enojado","odio","problema","molesto","cállate","déjame"];
-const CONFLICT=["angry","mad","hate","problem","fight","fighting","argue","argument","annoying","annoyed","upset","leave me","shut up","whatever","غاضب","معصب","زعلان","كره","مشكلة","شجار","نتخانق","خلاف","مزعج","اتركني","اسكت","خلص","بلا مزح","כועס","ריב","מריבה","בעיה","מעצבן","תעזוב","שתוק","נמאס","злюсь","ссора","ругаться","проблема","бесишь","отстань","замолчи","надоел","litigare","arrabbiato","problema","fastidioso","lasciami","pelea","enojado","problema","molesto","cállate","déjame"];
-const APOLOGY=["sorry","apologize","forgive","آسف","سامحني","معلش","סליחה","מצטער","извини","прости","scusa","perdona","perdón"];
-
-function includesLex(text,list){
-  const x=String(text).toLowerCase();
-  return list.reduce((s,k)=>s+(x.includes(String(k).toLowerCase())?1:0),0);
-}
-function lexicalTone(messages){
-  let positive=0,negative=0,conflict=0,apology=0;
-  for(const m of messages){positive+=includesLex(m.text,POS);negative+=includesLex(m.text,NEG);conflict+=includesLex(m.text,CONFLICT);apology+=includesLex(m.text,APOLOGY)}
-  return {positive,negative,conflict,apology,signalTotal:positive+negative};
-}
-const STOP=new Set(["the","and","you","that","this","with","for","are","was","have","from","but","not","your","just","what","when","where","how","can","will","all","its","our","who","why","что","это","как","для","она","они","меня","тебя","сейчас","очень","אני","אתה","את","זה","מה","איך","היום","מחר","של","עם","לא","כן","הוא","היא","من","في","على","هذا","هذه","انا","أنا","أنت","انت","هو","هي","ما","ماذا","كيف","مع","كان","كانت","الى","إلى","عن","لا","نعم","جدا","جداً","ciao","grazie","che","non","per","con","come","sono","sei","una","uno","del","della","hola","gracias","que","para","como","soy","eres","las","los"]);
-function topWords(messages,limit=20){
-  const f={};
-  for(const m of messages)for(const w of tokenize(m.text)){if(w.length<3||STOP.has(w)||/^\d+$/u.test(w))continue;f[w]=(f[w]||0)+1}
-  return Object.entries(f).sort((a,b)=>b[1]-a[1]).slice(0,limit);
-}
-
-/* =========================================================
-   SESSION + TIMING
-========================================================= */
-function chooseSessionGap(messages){
-  if(messages.length<6)return 45*60000;
+function sessionData(msgs){
+  if(msgs.length<2)return[{start:msgs[0].ts,end:msgs[0].ts,messages:[msgs[0]]}];
   const gaps=[];
-  for(let i=1;i<messages.length;i++){const g=messages[i].ts-messages[i-1].ts;if(g>0&&g<12*3600000)gaps.push(g)}
-  if(!gaps.length)return 45*60000;
+  for(let i=1;i<msgs.length;i++){const g=msgs[i].ts-msgs[i-1].ts;if(g>0&&g<12*3600000)gaps.push(g)}
   gaps.sort((a,b)=>a-b);
-  const p75=gaps[Math.floor(gaps.length*.75)];
-  return Math.max(20*60000,Math.min(120*60000,p75*3));
-}
-function buildSessions(messages){
-  const threshold=chooseSessionGap(messages),sessions=[];let cur=null;
-  for(const m of messages){
-    if(!cur){cur={start:m.ts,end:m.ts,messages:[m]}}
+  const base=gaps.length?gaps[Math.floor(gaps.length*.75)]*3:45*60000;
+  const threshold=Math.max(20*60000,Math.min(120*60000,base));
+  const sessions=[];let cur=null;
+  for(const m of msgs){
+    if(!cur)cur={start:m.ts,end:m.ts,messages:[m]};
     else if(m.ts-cur.end>threshold){sessions.push(cur);cur={start:m.ts,end:m.ts,messages:[m]}}
     else{cur.messages.push(m);cur.end=m.ts}
   }
   if(cur)sessions.push(cur);
-  return {sessions,threshold};
+  return sessions;
 }
 
-/* =========================================================
-   TOPICS
-========================================================= */
-const TOPICS={
-  "Love / Connection":["love","relationship","miss you","date","kiss","hug","أحب","حب","اشتقت","موعد","قبلة","عناق","אהבה","אוהב","מתגעגע","דייט","люблю","любовь","скучаю","свидание","amore","mi manchi","amor","te quiero"],
-  "Work / Study":["work","office","meeting","project","job","exam","study","class","school","university","עבודה","משרד","פגישה","פרויקט","לימודים","אוניברסיטה","מבחן","جامعة","دراسة","امتحان","مشروع","شغل","دوام","работа","встреча","проект","экзамен"],
-  "Sports / Fitness":["run","running","runner","gym","workout","training","football","soccer","basketball","tennis","swim","swimming","marathon","race","pace","fitness","جري","ركض","عداء","جيم","تمرين","تدريب","كرة قدم","كرة سلة","تنس","سباحة","ماراثون","ריצה","רץ","חדר כושר","אימון","כדורגל","כדורסל","טניס","שחייה","מרתון","бег","спортзал","тренировка","футбол","баскетбол","теннис","плавание","марафон"],
-  "Family":["family","mother","mom","father","dad","brother","sister","parent","משפחה","אמא","אבא","אח","אחות","عائلة","أمي","أبي","أخ","أخت","семья","мама","папа","брат","сестра"],
-  "Travel":["travel","trip","flight","airport","hotel","vacation","passport","train","سفر","رحلة","مطار","فندق","إجازة","جواز","قطار","טיול","טיסה","שדה תעופה","מלון","חופשה","דרכון","רכבת","поездка","самолет","аэропорт","отель","отпуск","паспорт","поезд"],
-  "Food":["food","eat","restaurant","dinner","lunch","coffee","pizza","אוכל","לאכול","מסעדה","ארוחה","קפה","פיצה","مطعم","أكل","غداء","عشاء","قهوة","بيتزا","еда","ресторан","ужин","кофе","пицца"],
-  "Plans":["tomorrow","today","tonight","later","weekend","plan","meet","מחר","היום","הלילה","תוכנית","פגישה","بكرا","غدا","اليوم","الليلة","خطة","موعد","завтра","сегодня","план","встретимся"],
-  "Money":["money","price","pay","salary","cost","buy","purchase","invoice","bank","כסף","מחיר","לשלם","משכורת","לקנות","سعر","فلوس","راتب","دفع","شراء","فاتورة","بنك","деньги","цена","зарплата","купить","банк"],
-  "Fun / Social":["haha","lol","party","game","movie","music","fun","חחח","מסיבה","משחק","סרט","מוזיקה","ضحك","حفلة","لعبة","فيلم","موسيقى","смешно","вечеринка","игра","фильм","музыка"]
-};
-function buildTopics(messages){
-  const scores={};
-  Object.keys(TOPICS).forEach(k=>scores[k]=0);
-  for(const m of messages){const x=m.text.toLowerCase();for(const [topic,keys] of Object.entries(TOPICS)){for(const key of keys){if(x.includes(String(key).toLowerCase()))scores[topic]++}}}
-  return Object.entries(scores).sort((a,b)=>b[1]-a[1]).slice(0,8);
-}
-
-/* =========================================================
-   CONFLICT RADAR
-========================================================= */
-function conflictRadar(messages){
-  const windows=[];
-  if(!messages.length)return windows;
-  const win=Math.min(8,Math.max(4,Math.floor(messages.length/35)));
-  for(let i=0;i<=messages.length-win;i++){
-    const slice=messages.slice(i,i+win);
-    const raw=slice.reduce((s,m)=>s+includesLex(m.text,CONFLICT)+.55*includesLex(m.text,NEG)+.25*includesLex(m.text,APOLOGY),0);
-    const questions=slice.filter(m=>isQuestion(m.text)).length;
-    const caps=slice.reduce((s,m)=>s+(m.text.replace(/[^A-ZА-Я]/gu,"").length>Math.max(8,m.text.length*.15)?1:0),0);
-    const score=raw+questions*.12+caps*.35;
-    if(score>=1.35){
-      windows.push({start:slice[0].ts,end:slice.at(-1).ts,score,count:slice.length,peak:slice.reduce((a,m)=>{const q=includesLex(m.text,CONFLICT)+includesLex(m.text,NEG);return q>a.q?{q,s:m.sender,t:m.text}:a},{q:0})});
-    }
+function conflictData(msgs){
+  const out=[],n=Math.max(4,Math.min(8,Math.floor(msgs.length/35)||4));
+  for(let i=0;i<=msgs.length-n;i++){
+    const x=msgs.slice(i,i+n),score=x.reduce((s,m)=>s+lex(m.text,CONFLICT)+.5*lex(m.text,NEG),0);
+    if(score>=1.5)out.push({start:x[0].ts,end:x[x.length-1].ts,score});
   }
-  windows.sort((a,b)=>a.start-b.start);
-  const episodes=[];
-  for(const w of windows){
-    const last=episodes.at(-1);
-    if(last&&w.start<=last.end+20*60000){last.end=Math.max(last.end,w.end);last.score=Math.max(last.score,w.score);last.count+=w.count/2;if(w.peak.q>last.peak.q)last.peak=w.peak}
-    else episodes.push({...w});
+  const merged=[];
+  for(const x of out){
+    const last=merged.at(-1);
+    if(last&&x.start<=last.end+20*60000){last.end=Math.max(last.end,x.end);last.score=Math.max(last.score,x.score)}
+    else merged.push({...x});
   }
-  return episodes.slice(-20);
+  return merged.slice(-15);
 }
 
-/* =========================================================
-   RELATIONSHIP PATTERN
-========================================================= */
-function relationshipPattern(r){
-  if(r.sorted.length<2)return {label:"Single speaker",detail:"Add a two-person or group conversation for reciprocity signals.",score:50};
-  const [a,b]=r.sorted,total=r.total;
-  const aShare=pct(a.messages,total),bShare=pct(b.messages,total);
-  const aStarts=pct(a.starts,Math.max(1,r.sessions.length)),bStarts=pct(b.starts,Math.max(1,r.sessions.length));
-  const aReply=mean(a.replies),bReply=mean(b.replies);
-  const symmetry=clamp(100-Math.abs(aShare-bShare)*1.35);
-  const startSym=clamp(100-Math.abs(aStarts-bStarts)*1.2);
-  const timingSym=(aReply&&bReply)?clamp(100-(Math.abs(aReply-bReply)/Math.max(aReply,bReply))*100):55;
-  const questionSpread=clamp(100-Math.abs(a.questions-b.questions)/Math.max(1,a.questions+b.questions)*100);
-  const score=Math.round(.32*symmetry+.28*startSym+.22*timingSym+.18*questionSpread);
-  let label="Balanced / reciprocal";
-  let detail="Both sides contribute measurable conversation energy.";
-  if(score<46){label="Uneven / asymmetric";detail="One side contributes much more of the observable conversation flow."}
-  else if(score<65){label="Mostly reciprocal";detail="The pattern is usable, but some behaviors are noticeably uneven."}
-  return {label,detail,score,a,b,symmetry,startSym,timingSym,questionSpread};
-}
-
-/* =========================================================
-   TREND DATA
-========================================================= */
-function trendSeries(messages,buckets=14){
-  if(messages.length<2)return [];
-  const min=messages[0].ts,max=messages.at(-1).ts,span=Math.max(1,max-min),step=span/buckets;
-  const out=[];
-  for(let i=0;i<buckets;i++){
-    const lo=min+i*step,hi=i===buckets-1?max+1:lo+step,ms=messages.filter(m=>m.ts>=lo&&m.ts<hi),cross=ms.filter(m=>Number.isFinite(m.replyMs));
-    out.push({label:new Date(lo).toLocaleDateString("en-US",{month:"short",day:"numeric"}),volume:ms.length,avgReply:cross.length?mean(cross.map(m=>m.replyMs))/60000:null,avgWords:ms.length?mean(ms.map(m=>m.words)):0,conflict:ms.reduce((s,m)=>s+includesLex(m.text,CONFLICT)+.5*includesLex(m.text,NEG),0),positive:ms.reduce((s,m)=>s+includesLex(m.text,POS),0)});
+function trend(msgs,b=14){
+  if(msgs.length<2)return[];
+  const min=msgs[0].ts,max=msgs.at(-1).ts,step=Math.max(1,max-min)/b,out=[];
+  for(let i=0;i<b;i++){
+    const lo=min+i*step,hi=i===b-1?max+1:lo+step,x=msgs.filter(m=>m.ts>=lo&&m.ts<hi),rep=x.map(m=>m.replyMs).filter(Number.isFinite);
+    out.push({
+      label:new Date(lo).toLocaleDateString("en-US",{month:"short",day:"numeric"}),
+      volume:x.length,words:mean(x.map(m=>m.words)),reply:rep.length?mean(rep)/60000:0,
+      positive:x.reduce((s,m)=>s+lex(m.text,POS),0),
+      conflict:x.reduce((s,m)=>s+lex(m.text,CONFLICT),0)
+    });
   }
   return out;
 }
 
-/* =========================================================
-   DIMENSION ENGINE
-   Broad domain + behavior model.
-========================================================= */
-const DIMENSIONS={
-  Attachment:{icon:"🧲",description:"Attachment-like continuity, reassurance-seeking and contact persistence.",keywords:["miss you","miss me","where are you","are you okay","thinking of you","اشتقت","وينك","طمني","أنا هون","מתגעגע","איפה אתה","אתה בסדר","люблю","скучаю","где ты"],weights:{continuity:1.1,question:0.7,positive:0.8}},
-  Romantic:{icon:"❤️",description:"Romantic or affectionate communication signals.",keywords:["love","kiss","hug","date","baby","babe","darling","حبي","حب","عشق","قبلة","حضن","موعد","حبيب","אהבה","נשיקה","חיבוק","דייט","люблю","поцелуй","обнимаю","amore","bacio","amor","beso"],weights:{positive:1.3,continuity:.6}},
-  Friendship:{icon:"🤝",description:"Friendship and social-bond signals.",keywords:["bro","buddy","friend","mate","hang out","party","together","صاحبي","صديق","رفيق","نطلع","مع بعض","חבר","חברים","ביחד","друг","друзья","вместе","amico","amici","amigo","amigos"],weights:{positive:.9,continuity:.8}},
-  Professional:{icon:"💼",description:"Workplace and professional communication.",keywords:["meeting","project","office","client","deadline","report","manager","work","job","مكتب","اجتماع","مشروع","عميل","تقرير","مدير","شغل","دوام","פגישה","פרויקט","משרד","לקוח","עבודה","מנהל","встреча","проект","офис","работа","клиент","lavoro","progetto","trabajo","proyecto"],weights:{continuity:.7,question:.3}},
-  Study:{icon:"📚",description:"Academic, study and education signals.",keywords:["exam","test","assignment","homework","lecture","class","university","college","study","امتحان","اختبار","واجب","محاضرة","جامعة","دراسة","كلية","מבחן","שיעורי בית","אוניברסיטה","לימודים","קורס","экзамен","учеба","университет","лекция","esame","università","studio","examen","universidad"],weights:{question:.5,continuity:.6}},
-  "Sports / Fitness":{icon:"🏃",description:"Sports, running, gym and fitness signals.",keywords:["run","running","runner","gym","workout","training","football","soccer","basketball","tennis","swim","swimming","marathon","race","pace","fitness","جري","ركض","عداء","جيم","تمرين","تدريب","كرة قدم","كرة سلة","تنس","سباحة","ماراثون","ריצה","רץ","חדר כושר","אימון","כדורגל","כדורסל","טניס","שחייה","מרתון","бег","спортзал","тренировка","футбол","баскетбол","теннис","плавание","марафон","corsa","correre","palestra","allenamento","calcio","tenis","nuoto","maratona","correr","gimnasio","entrenamiento","fútbol","tenis","natación","maratón"],weights:{continuity:.5,question:.2}},
-  Support:{icon:"🫂",description:"Support, reassurance, encouragement and help.",keywords:["i'm here for you","don't worry","help","support","you can do it","proud of you","لا تخاف","أنا معك","أنا هون","ساعدك","لا تقلق","فخور فيك","אני איתך","אל תדאג","עזרה","גאה בך","я рядом","не переживай","помогу","горжусь","ti aiuto","non preoccuparti","te ayudo","no te preocupes"],weights:{positive:1.2,continuity:.7}},
-  Humor:{icon:"😂",description:"Humor, teasing and playfulness.",keywords:["haha","hahaha","lol","lmao","funny","joke","kidding","هههه","ههههه","لول","مزحة","امزح","ضحك","חחח","בדיחה","צוחק","смешно","ха-ха","шутка","ahah","scherzo","divertente","jaja","broma","gracioso"],weights:{positive:1}},
-  Jealousy:{icon:"👀",description:"Jealousy-like, exclusivity and comparison signals — not proof of jealousy.",keywords:["who is that","who were you with","another girl","another guy","why her","why him","من هاي","من هذا","مع مين","مين كانت","مين كان","ليش معها","ليش معه","מי זאת","מי זה","עם מי","למה איתה","למה איתו","кто это","с кем ты","почему с ней","почему с ним","chi è lei","chi è lui","con chi","quién es ella","quién es él","con quién"],weights:{question:1.2,negative:.3}},
-  Distance:{icon:"🧊",description:"Withdrawal, closing-off or distancing language.",keywords:["leave me","don't talk","stop texting","busy","whatever","goodbye","not now","اتركني","لا تحكي معي","وقف رسائل","مشغول","خلص","وداع","مش الآن","עזוב אותי","אל תדבר איתי","עסוק","די","ביי","לא עכשיו","отстань","не пиши","занят","прощай","не сейчас","lasciami","non scrivere","occupato","déjame","no escribas","ocupado"],weights:{negative:1.3}},
-  Planning:{icon:"📅",description:"Scheduling, meetings and coordination.",keywords:["tomorrow","today","tonight","later","weekend","plan","meet","schedule","بكرا","اليوم","الليلة","بعد","الويكند","نلتقي","خطة","موعد","מחר","היום","הלילה","להיפגש","תוכנית","לוח זמנים","завтра","сегодня","встретимся","план","domani","oggi","piano","mañana","hoy","plan"],weights:{continuity:.9,question:.3}},
-  Finance:{icon:"💳",description:"Money, finance, purchases and payment.",keywords:["money","price","pay","salary","cost","buy","purchase","invoice","bank","مال","سعر","دفع","راتب","تكلفة","شراء","فاتورة","بنك","כסף","מחיר","לשלם","משכורת","עלות","לקנות","בנק","деньги","цена","зарплата","купить","банк","soldi","prezzo","stipendio","comprare","banca","dinero","precio","salario","comprar","banco"],weights:{question:.3}},
-  Travel:{icon:"✈️",description:"Travel, trips, flights and mobility.",keywords:["travel","trip","flight","airport","hotel","vacation","passport","train","سفر","رحلة","طائرة","مطار","فندق","إجازة","جواز","قطار","טיול","טיסה","שדה תעופה","מלון","חופשה","דרכון","רכבת","поездка","самолет","аэропорт","отель","отпуск","паспорт","поезд","viaggio","aeroporto","hotel","vacanza","treno","viaje","vuelo","aeropuerto","hotel","vacaciones","tren"],weights:{continuity:.8,question:.2}},
-  Family:{icon:"👨‍👩‍👧",description:"Family-related communication.",keywords:["mother","mom","father","dad","brother","sister","family","parent","أمي","أبي","أخ","أخت","عائلة","أهل","אמא","אבא","אח","אחות","משפחה","הורים","мама","папа","брат","сестра","семья","родители","mamma","papà","fratello","sorella","famiglia","madre","padre","hermano","hermana","familia"],weights:{continuity:.5}},
-  Wellbeing:{icon:"🌿",description:"Sleep, energy, rest and everyday wellbeing mentions — not a diagnosis.",keywords:["tired","sleep","sleeping","energy","rest","stress","exhausted","sick","تعبان","نوم","طاقة","راحة","ضغط","مرهق","مريض","עייף","שינה","אנרגיה","מנוחה","לחץ","תשוש","устал","сон","энергия","отдых","стресс","болею","stanco","sonno","energia","riposo","stress","cansado","sueño","energía","descanso","estrés"],weights:{negative:.4,positive:.2}},
-  Interest:{icon:"🔎",description:"Curiosity, question engagement and desire to know more.",keywords:["tell me","what happened","why","how","really","more","احكيلي","شو صار","ليش","كيف","جد","أكثر","ספר לי","מה קרה","למה","איך","באמת","יותר","расскажи","что случилось","почему","как","правда","больше","raccontami","qué pasó","cuéntame","por qué","cómo","de verdad"],weights:{question:1.3,continuity:.5}},
-  CommunicationEffort:{icon:"🧠",description:"Effort expressed through response depth, questions, follow-ups and continuity.",keywords:[],weights:{question:1,continuity:1}},
-  Repair:{icon:"🛠️",description:"Apology, reconciliation and conflict-repair signals.",keywords:[...APOLOGY,"let's fix","make it up","سامحني","نصلح","סליחה","נשלים","извини","помиримся","scusa","perdón"],weights:{positive:.7,question:.2}},
-  Conflict:{icon:"⚡",description:"Friction, anger, disagreement and pressure signals.",keywords:[...CONFLICT],weights:{negative:1.1}},
-  Affection:{icon:"💗",description:"Warmth, tenderness and approval signals.",keywords:["love","miss you","sweet","cute","حلو","جميل","اشتقت","يا روحي","מקסים","חמוד","מתגעגע","люблю","скучаю","милый","dolce","adoro","te quiero"],weights:{positive:1.4}},
-  Reciprocity:{icon:"🔁",description:"How evenly the conversation energy is exchanged.",keywords:[],weights:{continuity:1}},
-  Responsiveness:{icon:"⚡",description:"How reliably participants respond within usable timing windows.",keywords:[],weights:{continuity:1}},
-  Initiation:{icon:"🚀",description:"Who creates session starts and opens new conversation segments.",keywords:[],weights:{continuity:1}},
-  QuestionEngagement:{icon:"❓",description:"Question-asking and engagement with conversational prompts.",keywords:[],weights:{question:1}},
-  MessageDepth:{icon:"📐",description:"Message length and sustained conversation depth.",keywords:[],weights:{continuity:1}}
-};
-
-function dimensionScore(key,d,messages,summary){
-  let lexicalHits=0;
-  let evidence=[];
-  let questions=0;
-  let positive=0;
-  let negative=0;
-  let crossReply=0;
-  let wordTotal=0;
-  for(const m of messages){
-    const x=m.text.toLowerCase();
-    wordTotal+=m.words;
-    if(isQuestion(m.text))questions++;
-    if(Number.isFinite(m.replyMs))crossReply++;
-    positive+=includesLex(m.text,POS);
-    negative+=includesLex(m.text,NEG);
-    for(const k of d.keywords||[]){
-      if(x.includes(String(k).toLowerCase())){
-        lexicalHits++;
-        if(evidence.length<7)evidence.push(k);
-      }
-    }
-  }
-  const msgCount=Math.max(1,messages.length);
-  const qRate=pct(questions,msgCount);
-  const replyRate=pct(crossReply,msgCount);
-  const avgWords=wordTotal/msgCount;
-  let raw=0;
-  if(key==="CommunicationEffort") raw=clamp(qRate*.8+replyRate*.8+Math.min(100,avgWords*4)*.5);
-  else if(key==="Reciprocity") raw=summary?.relation?.score||50;
-  else if(key==="Responsiveness") raw=summary?.replyScore||50;
-  else if(key==="Initiation") raw=summary?.initiation||50;
-  else if(key==="QuestionEngagement") raw=clamp(qRate*2.2);
-  else if(key==="MessageDepth") raw=clamp(avgWords*3.2);
-  else{
-    const density=pct(lexicalHits,msgCount);
-    raw=density*.7+qRate*.12+replyRate*.12+Math.min(100,positive*2)*.03-Math.min(50,negative)*.02;
-    raw*=1+(d.weights?.continuity||0)*.12+(d.weights?.question||0)*.08+(d.weights?.positive||0)*.08+(d.weights?.negative||0)*.08;
-  }
-  const score=Math.round(clamp(raw));
-  const confidence=clamp(Math.round(38+messages.length/5+lexicalHits*8));
-  return {score,confidence,evidence,lexicalHits,qRate,replyRate,avgWords};
-}
-function buildDimensions(r){
-  const out={};
-  for(const [key,d] of Object.entries(DIMENSIONS))out[key]={...d,result:dimensionScore(key,d,r.messages,r)};
-  return out;
-}
-
-/* =========================================================
-   SOCIAL SIGNAL RANKING
-========================================================= */
-function socialRankMessages(r){
-  const now=r.messages.at(-1)?.ts||Date.now();
-  const maxAge=Math.max(7*86400000,now-(r.messages[0]?.ts||now));
-  const recentTopicFreq={};
-  for(const m of r.messages.slice(-300))for(const w of tokenize(m.text))if(w.length>=4&&!STOP.has(w))recentTopicFreq[w]=(recentTopicFreq[w]||0)+1;
-  return r.messages.map((m,i)=>{
-    const age=Math.max(0,now-m.ts);
-    const recency=Math.exp(-age/Math.max(maxAge*.23,1));
-    const reaction=(m.reactionScore||0)/2.2;
-    const next=r.messages[i+1];
-    const reply=next&&next.sender!==m.sender?1:0;
-    const followUp=next&&next.sender!==m.sender?clamp(next.words/14):0;
-    const question=isQuestion(m.text)?.45:0;
-    const density=clamp(m.words/18);
-    const toks=tokenize(m.text);
-    const topic=toks.reduce((a,w)=>a+(recentTopicFreq[w]||0),0)/Math.max(1,toks.length*8);
-    const positive=includesLex(m.text,POS);
-    const friction=includesLex(m.text,CONFLICT)+.6*includesLex(m.text,NEG);
-    const continuity=clamp(reply*.65+followUp*.35);
-    const quality=clamp(.25*density+.25*continuity+.2*topic+.15*question+.15*clamp(positive/2));
-    const penalty=clamp(friction*.12,0,.25);
-    const rw=0.20+0.28*ANALYSIS_PROFILE.recency;
-    const ew=0.18+0.28*ANALYSIS_PROFILE.engagement;
-    const score=100*clamp(rw*recency+ew*clamp(reaction,0,1)+.16*quality+.14*continuity+.08*topic-penalty);
-    return {...m,socialRank:score,rankReasons:{recency,reaction,reply,followUp,topic,friction}};
-  }).sort((a,b)=>b.socialRank-a.socialRank).slice(0,12);
-}
-
-/* =========================================================
-   OPEN VOCABULARY
-========================================================= */
-const EMOTION_PROTOTYPES={
-  Warmth:["affection, warmth, tenderness, liking","حب، مودة، دفء، حنان","אהבה, חום, חיבה","любовь, тепло, нежность"],
-  Interest:["curiosity, interest, attention, wanting to know more","فضول، اهتمام، رغبة في المعرفة","סקרנות, עניין, תשומת לב","интерес, любопытство, внимание"],
-  Playfulness:["humor, teasing, joking, fun, playful energy","مزاح، ضحك، مرح، طاقة مرحة","הומור, צחוק, משחקיות","юмор, шутки, веселье"],
-  Support:["care, reassurance, encouragement, helping","دعم، طمأنة، تشجيع، مساعدة","תמיכה, עידוד, הרגעה","поддержка, забота, ободрение"],
-  Friction:["frustration, irritation, anger, disagreement, pressure","إحباط، انزعاج، غضب، خلاف، ضغط","תסכול, כעס, מחלוקת, לחץ","раздражение, злость, конфликт, давление"],
-  Distance:["coldness, withdrawal, emotional distance, detachment","برود، ابتعاد، مسافة، انسحاب","ריחוק, קור, התרחקות","отдаление, холодность, дистанция"],
-  Repair:["apology, repair, reconciliation, forgiveness","اعتذار، إصلاح، مصالحة، مسامحة","סליחה, פיוס, תיקון","извинение, примирение, прощение"],
-  Uncertainty:["doubt, confusion, ambiguity, hesitation, not knowing","شك، حيرة، غموض، تردد","ספק, בלבול, אי ודאות","сомнение, путаница, неопределенность"]
-};
-function ngramCandidates(messages){
-  const f={};
-  for(const m of messages)for(const w of tokenize(m.text)){if(w.length<3||STOP.has(w)||/^\d+$/u.test(w))continue;f[w]=(f[w]||0)+1}
-  return Object.entries(f).sort((a,b)=>b[1]-a[1]);
-}
-function openVocabHeuristic(r){
-  const candidates=ngramCandidates(r.messages).slice(0,80);
-  const groups={Warmth:[],Interest:[],Playfulness:[],Support:[],Friction:[],Distance:[],Repair:[],Uncertainty:[]};
-  for(const [w,n] of candidates){
-    const x=w.toLowerCase();
-    if(POS.some(k=>x===k.toLowerCase()))groups.Warmth.push(n);
-    if(NEG.some(k=>x===k.toLowerCase()))groups.Friction.push(n);
-    if(APOLOGY.some(k=>x===k.toLowerCase()))groups.Repair.push(n);
-    if(/[?؟]/u.test(x))groups.Uncertainty.push(n);
-  }
-  const norm=v=>clamp((v.reduce((a,b)=>a+b,0)||0)*2.4);
-  r.openVocab=Object.fromEntries(Object.keys(groups).map(k=>[k,norm(groups[k])]));
-  return r.openVocab;
-}
-
-/* =========================================================
-   DLRM-INSPIRED / MEANINGFUL SOCIAL INTERACTION ENGINE
-========================================================= */
-function computeParticipantInteractionFeatures(r){
-  const out={};
-  for(const p of r.sorted){
-    const msgs=r.messages.filter(m=>m.sender===p.sender);
-    const replyMean=mean(msgs.map(m=>m.replyMs).filter(Number.isFinite));
-    const questions=msgs.filter(m=>isQuestion(m.text)).length;
-    const reactions=msgs.reduce((s,m)=>s+(m.reactions?.length||0),0);
-    const avgWords=mean(msgs.map(m=>m.words));
-    const continuity=pct(msgs.filter(m=>Number.isFinite(m.replyMs)).length,Math.max(1,msgs.length));
-    const positive=msgs.reduce((s,m)=>s+includesLex(m.text,POS),0);
-    const friction=msgs.reduce((s,m)=>s+includesLex(m.text,CONFLICT)+.6*includesLex(m.text,NEG),0);
-    out[p.sender]={share:pct(p.messages,r.total),starts:pct(p.starts,Math.max(1,r.sessions.length)),replyMean,questions,reactions,avgWords,continuity,positive,friction};
-  }
-  return out;
-}
-function computeMeaningfulSocialInteraction(r){
-  const f=computeParticipantInteractionFeatures(r),lastTs=r.messages.at(-1)?.ts||Date.now(),people=Object.entries(f);
-  if(!people.length)return {score:0,propensity:0,features:[]};
-  const features=people.map(([sender,x])=>{
-    const lastSenderTs=r.messages.filter(m=>m.sender===sender).at(-1)?.ts||0;
-    const recency=clamp(Math.exp(-Math.max(0,lastTs-lastSenderTs)/Math.max(86400000,30*86400000))*100);
-    const responsiveness=clamp(100-(x.replyMean?Math.log1p(x.replyMean/60000)*16:42));
-    const questions=clamp(pct(x.questions,Math.max(1,r.total))*8);
-    const reactions=clamp(x.reactions*7);
-    const contentDepth=clamp(x.avgWords*3.2);
-    const reciprocity=clamp(100-Math.abs(x.share-50)*1.6);
-    const warmth=clamp(50+x.positive*5-x.friction*2);
-    const continuity=x.continuity;
-    const score=.18*reciprocity+.15*responsiveness+.12*questions+.16*reactions+.12*contentDepth+.12*continuity+.10*warmth+.05*recency;
-    const propensity=.30*recency+.28*clamp(reactions,0,100)+.18*responsiveness+.14*continuity+.10*contentDepth;
-    return {sender,score,propensity,reciprocity,responsiveness,questions,reactions,contentDepth,continuity,warmth,recency};
-  });
-  return {score:clamp(Math.round(mean(features.map(x=>x.score)))),propensity:clamp(Math.round(mean(features.map(x=>x.propensity)))),features};
-}
-function renderRecommendationEngine(r){
-  const x=r.deepInteraction||computeMeaningfulSocialInteraction(r);
-  $("msiScore").textContent=x.score+"/100";$("propensityScore").textContent=x.propensity+"/100";
-  const copy={balanced:"Balanced interaction weighting.",relationship:"Relationship mode emphasizes reciprocity, continuity, warmth and response behavior.",professional:"Professional mode emphasizes consistency, response discipline, planning and work signals.",sports:"Sports mode emphasizes sports / routine / fitness continuity and interaction depth.",study:"Study mode emphasizes academic planning and question engagement.",safety:"Safety mode emphasizes integrity and moderation signals."}[ANALYSIS_PROFILE.mode]||"";
-  $("msiText").textContent=copy;
-  $("recoGrid").innerHTML=x.features.slice().sort((a,b)=>b.score-a.score).map(v=>`<div class="reco-card"><b>${esc(v.sender)}</b><span>MSI ${Math.round(v.score)} · propensity ${Math.round(v.propensity)}</span><span>reciprocity ${Math.round(v.reciprocity)} · response ${Math.round(v.responsiveness)} · continuity ${Math.round(v.continuity)}</span><span>questions ${Math.round(v.questions)} · reactions ${Math.round(v.reactions)} · depth ${Math.round(v.contentDepth)}</span></div>`).join("");
-}
-
-/* =========================================================
-   CONTENT INTEGRITY / MODERATION
-========================================================= */
-const MODERATION_LEX={harassment:["idiot","stupid","loser","worthless","moron","shut up","أحمق","غبي","تافه","קללה","дурак"],hate:["hate all","go back to","subhuman","inferior race","كراهية","גזע נחות","ненавижу всех"],scam:["send money","wire transfer","double your money","gift card","investment opportunity","crypto","حوّل المال","رمز التحقق","переведи деньги"],phishing:["verify account","login here","reset password","security code","otp","one time password","click this link","تأكيد الحساب","رمز التحقق","אימות חשבון"],coercion:["or else","if you don't","do it now","you must","prove it","send me","إذا لم","لازم","أرسل لي","ты должен"],misinformation:["breaking news","secret cure","guaranteed cure","they are hiding","100% proven","fake news","خبر عاجل","علاج مضمون","מסתירים מכם","лекарство от всего"]};
-function hasSuspiciousUrl(text){return /(?:https?:\/\/|www\.|bit\.ly\/|tinyurl\.com\/|t\.me\/|wa\.me\/)/i.test(text)}
-function moderationSignals(r){
-  const out={};
-  for(const [key,terms] of Object.entries(MODERATION_LEX)){let hits=0,examples=[];for(const m of r.messages){const n=includesLex(m.text,terms);if(n){hits+=n;if(examples.length<5)examples.push({sender:m.sender,text:m.text})}}out[key]={score:clamp(Math.round(hits*10)),hits,examples};}
-  const links=r.messages.filter(m=>hasSuspiciousUrl(m.text));out.suspiciousLinks={score:clamp(Math.round(pct(links.length,Math.max(1,r.total)))),hits:links.length,examples:links.slice(-5).map(m=>({sender:m.sender,text:m.text}))};return out;
-}
-function renderModeration(r){
-  const m=r.moderation||moderationSignals(r);const rows=[["Harassment",m.harassment?.score||0,"red"],["Hate-like language",m.hate?.score||0,"red"],["Scam-like",m.scam?.score||0,"orange"],["Phishing-like",m.phishing?.score||0,"gold"],["Coercion-like",m.coercion?.score||0,"violet"],["Misinformation-like",m.misinformation?.score||0,"cyan"],["Suspicious links",m.suspiciousLinks?.score||0,"pink"]];
-  $("moderationOverview").innerHTML=rows.map(([n,v,c])=>`<div class="signal"><strong class="${c}">${v}/100</strong><span>${esc(n)}</span></div>`).join("");
-  const ev=[];for(const [k,v] of Object.entries(m))for(const e of v.examples||[])ev.push(`<div class="evidence-row"><b>${esc(k)}</b> · ${esc(e.sender)} · ${esc(e.text.slice(0,180))}</div>`);
-  $("moderationEvidence").innerHTML=ev.slice(0,12).join("")||'<div class="subtxt">No high-signal moderation evidence detected by the baseline layer.</div>';
-}
-
-/* =========================================================
-   OPEN VOCABULARY DISCOVERY
-========================================================= */
-function buildDynamicVocabulary(r){
-  const f=new Map();for(const m of r.messages){const t=tokenize(m.text);for(let i=0;i<t.length;i++){if(t[i].length>=4&&!STOP.has(t[i]))f.set(t[i],(f.get(t[i])||0)+1);if(i<t.length-1&&t[i].length>=3&&t[i+1].length>=3){const bi=t[i]+" "+t[i+1];f.set(bi,(f.get(bi)||0)+1)}}}
-  const known=new Set();for(const d of Object.values(DIMENSIONS))for(const k of d.keywords||[])known.add(String(k).toLowerCase());
-  const list=[...f.entries()].filter(([x])=>!known.has(x.toLowerCase())).sort((a,b)=>b[1]-a[1]).slice(0,40);r.dynamicVocabulary=list;DYNAMIC_VOCAB=list;return list;
-}
-function renderDynamicVocabulary(r){
-  const list=r.dynamicVocabulary||buildDynamicVocabulary(r);$("openDiscovery").innerHTML=list.map(([term,freq])=>{const score=clamp(Math.round(48+Math.min(45,freq*7)));return `<div class="discovery-item"><strong>${esc(term)}</strong><span>Automatically discovered from the conversation instead of requiring a predefined keyword.</span><div class="discovery-score">candidate strength ${score}/100 · ${freq} hits</div></div>`}).join("")||'<div class="subtxt">Not enough vocabulary evidence for discovery.</div>';
-}
-function applyAnalysisProfile(r){
-  const boosts={balanced:{},relationship:{Attachment:1.2,Romantic:1.16,Affection:1.16,Support:1.08,Reciprocity:1.12},professional:{Professional:1.35,Planning:1.16,Finance:1.08,Study:1.04,Responsiveness:1.12},sports:{Sports:1.45,Wellbeing:1.12,Planning:1.08,CommunicationEffort:1.08},study:{Study:1.42,Planning:1.1,Interest:1.08,QuestionEngagement:1.18},safety:{Conflict:1.28,Distance:1.12,Repair:1.12,Responsiveness:1.08}}[ANALYSIS_PROFILE.mode]||{};for(const [k,v] of Object.entries(r.dimensions||{}))v.profileScore=clamp(Math.round(v.result.score*(boosts[k]||1)*(0.75+0.25*ANALYSIS_PROFILE.engagement)));
-}
-
-/* =========================================================
-   CORE ANALYSIS
-========================================================= */
 function analyze(raw){
-  const base=parseMessages(raw).filter(m=>m.sender&&m.text);
-  if(!base.length){fail("No readable WhatsApp messages were found.");return}
-  const messages=base.map((m,i)=>({...m,index:i,ts:parseDate(m.date,m.time)})).filter(m=>Number.isFinite(m.ts));
-  if(!messages.length){fail("Messages were found, but their dates could not be parsed safely.");return}
-  for(const m of messages){m.words=countWords(m.text);m.reactions=[];m.reactionScore=0}
-  const names=[...new Set(messages.map(m=>m.sender))];
-  const by={};
-  names.forEach(n=>by[n]={messages:0,words:0,questions:0,starts:0,replies:[],positive:0,negative:0});
-  const replyTimes=[];
-  for(let i=0;i<messages.length;i++){
-    const m=messages[i];
-    by[m.sender].messages++;
-    by[m.sender].words+=m.words;
-    by[m.sender].questions+=isQuestion(m.text)?1:0;
-    by[m.sender].positive+=includesLex(m.text,POS);
-    by[m.sender].negative+=includesLex(m.text,NEG);
-    if(i){
-      const prev=messages[i-1];
-      const gap=m.ts-prev.ts;
-      if(prev.sender!==m.sender&&gap>=0&&gap<=24*3600000){m.replyMs=gap;by[m.sender].replies.push(gap);replyTimes.push(gap)}
+  try{
+    const parsed=parseMessages(raw).filter(m=>m.sender&&m.text);
+    if(!parsed.length)throw new Error("No readable WhatsApp messages found.");
+    const msgs=parsed.map((m,i)=>({...m,index:i,ts:parseDate(m.date,m.time)})).filter(m=>Number.isFinite(m.ts));
+    if(!msgs.length)throw new Error("Messages were found, but dates could not be parsed.");
+    msgs.forEach(m=>m.words=words(m.text));
+
+    const names=[...new Set(msgs.map(m=>m.sender))],by={},replies=[];
+    names.forEach(n=>by[n]={messages:0,words:0,questions:0,starts:0,replies:[],positive:0,negative:0});
+
+    msgs.forEach((m,i)=>{
+      const p=by[m.sender];
+      p.messages++;p.words+=m.words;p.questions+=question(m.text)?1:0;
+      p.positive+=lex(m.text,POS);p.negative+=lex(m.text,NEG);
+      if(i){
+        const prev=msgs[i-1],gap=m.ts-prev.ts;
+        if(prev.sender!==m.sender&&gap>=0&&gap<=86400000){m.replyMs=gap;p.replies.push(gap);replies.push(gap)}
+      }
+    });
+
+    const sessions=sessionData(msgs);
+    sessions.forEach(s=>{const n=s.messages[0].sender;if(by[n])by[n].starts++});
+    const total=msgs.length,totalWords=msgs.reduce((s,m)=>s+m.words,0);
+    const sorted=names.map(n=>({sender:n,...by[n]})).sort((a,b)=>b.messages-a.messages);
+
+    const languages={Arabic:0,English:0,Hebrew:0,Russian:0,Italian:0,Spanish:0,Mixed:0,Unknown:0};
+    msgs.forEach(m=>languages[detectLang(m.text)]++);
+
+    const relationScore=sorted.length>1?clamp(100-Math.abs(pct(sorted[0].messages,total)-50)*1.65):50;
+    const avgWords=totalWords/Math.max(1,total);
+    const depth=clamp(30+avgWords*2.2+Math.min(25,sessions.length*1.3));
+    const initiation=sorted.length>1?clamp(100-Math.abs(pct(sorted[0].starts,Math.max(1,sessions.length))-50)*1.5):50;
+    const response=replies.length?clamp(108-Math.log1p(mean(replies)/60000)*20):58;
+    const conflicts=conflictData(msgs);
+
+    const pulse=Math.round(clamp(
+      .27*relationScore+.22*initiation+.25*response+.18*depth+
+      .08*(100-clamp(conflicts.length*3,0,20))
+    ));
+
+    const quality=Math.round(clamp(
+      65+Math.min(25,replies.length/Math.max(1,total)*100)+Math.min(10,names.length*2)
+    ));
+
+    const topics={};
+    Object.keys(TOPICS).forEach(k=>topics[k]=0);
+    msgs.forEach(m=>{
+      const x=m.text.toLowerCase();
+      for(const[name,list]of Object.entries(TOPICS))
+        list.forEach(k=>{if(x.includes(k.toLowerCase()))topics[name]++});
+    });
+
+    const topicList=Object.entries(topics).sort((a,b)=>b[1]-a[1]).slice(0,8);
+
+    const emo={};
+    msgs.forEach(m=>emojis(m.text).forEach(e=>emo[e]=(emo[e]||0)+1));
+    const topEmoji=Object.entries(emo).sort((a,b)=>b[1]-a[1]).slice(0,12);
+
+    const dimensions={};
+    for(const[name,list]of Object.entries(DIMENSIONS)){
+      let hits=0;const evidence=[];
+      msgs.forEach(m=>{
+        for(const k of list){
+          if(m.text.toLowerCase().includes(k.toLowerCase())){
+            hits++;if(evidence.length<5)evidence.push(k);
+          }
+        }
+      });
+      let score=clamp(hits/Math.max(1,total)*(name==="Sports / Fitness"?1600:1200));
+      dimensions[name]={score:Math.round(score),evidence};
     }
+
+    LAST={
+      messages:msgs,total,totalWords,names,by,sorted,sessions,replies,languages,
+      dominant:Object.entries(languages).sort((a,b)=>b[1]-a[1])[0][0],
+      relationScore,initiation,response,depth,conflicts,pulse,quality,
+      topics:topicList,emojis:topEmoji,dimensions,trend:trend(msgs),
+      positive:msgs.reduce((s,m)=>s+lex(m.text,POS),0),
+      negative:msgs.reduce((s,m)=>s+lex(m.text,NEG),0),
+      conflictWords:msgs.reduce((s,m)=>s+lex(m.text,CONFLICT),0),
+      apologies:msgs.reduce((s,m)=>s+lex(m.text,APOLOGY),0)
+    };
+
+    $("error").style.display="none";
+    $("dashboard").style.display="block";
+    $("status").textContent=`✓ Analyzed ${total.toLocaleString()} messages · ${names.length} participants`;
+    render(LAST);
+  }catch(err){
+    console.error(err);
+    $("dashboard").style.display="none";
+    $("error").textContent=err.message||"Could not analyze file.";
+    $("error").style.display="block";
+    $("status").textContent="";
   }
-  const sb=buildSessions(messages),sessions=sb.sessions;
-  sessions.forEach(s=>by[s.messages[0].sender].starts++);
-  const total=messages.length;
-  const totalWords=messages.reduce((a,m)=>a+m.words,0);
-  const sorted=names.map(n=>({sender:n,...by[n]})).sort((a,b)=>b.messages-a.messages);
-  const langs={Arabic:0,English:0,Hebrew:0,Russian:0,Italian:0,Spanish:0,Mixed:0,Unknown:0};
-  messages.forEach(m=>langs[detectLanguage(m.text)]++);
-  const dominant=Object.entries(langs).sort((a,b)=>b[1]-a[1])[0]?.[0]||"Unknown";
-  const tone=lexicalTone(messages);
-  const emojis=emojiStats(messages);
-  const conflicts=conflictRadar(messages);
-  const topics=buildTopics(messages);
-  const trend=trendSeries(messages);
-  const relation=relationshipPattern({total,sorted,sessions});
-  const avgLen=totalWords/Math.max(1,total);
-  const depth=clamp(32+Math.min(45,avgLen*2.2)+Math.min(23,mean(sessions.map(s=>s.messages.length))*1.15));
-  const participation=sorted.length>1?clamp(100-Math.abs(pct(sorted[0].messages,total)-50)*1.65):100;
-  const initiation=sorted.length>1?clamp(100-Math.abs(pct(sorted[0].starts,Math.max(1,sessions.length))-50)*1.55):100;
-  const replyScore=replyTimes.length?clamp(108-Math.log1p(mean(replyTimes)/60000)*20):58;
-  const conflictPenalty=clamp(conflicts.length*2.5,0,18);
-  const pulse=Math.round(clamp(.25*participation+.22*initiation+.25*replyScore+.20*depth+.08*(100-conflictPenalty)));
-  const coverage=clamp(52+Math.min(23,replyTimes.length/Math.max(1,total)*100)+Math.min(25,names.length*5));
-  const result={messages,total,totalWords,names,by,sorted,sessions,sessionGap:sb.threshold,replyTimes,dominant,langs,tone,emojis,conflicts,topics,trend,relation,depth,participation,initiation,replyScore,pulse,coverage,topWords:topWords(messages)};
-  result.reactionTotal=0;
-  result.dimensions=buildDimensions(result);
-  result.deepInteraction=computeMeaningfulSocialInteraction(result);
-  result.moderation=moderationSignals(result);
-  result.dynamicVocabulary=buildDynamicVocabulary(result);
-  openVocabHeuristic(result);
-  applyAnalysisProfile(result);
-  if(REACTION_DATA.length)attachReactions(result);
-  LAST=result;
-  $("dashboard").style.display="block";
-  render(result);
-  $("status").textContent=`✓ Analyzed ${total.toLocaleString()} messages across ${names.length} participants`;
 }
 
-/* =========================================================
-   RENDER ROOT
-========================================================= */
-function render(r){
-  $("totalMsgs").textContent=r.total.toLocaleString();
-  $("totalWords").textContent=r.totalWords.toLocaleString();
-  $("sessionCount").textContent=r.sessions.length.toLocaleString();
-  $("avgReply").textContent=r.replyTimes.length?duration(mean(r.replyTimes)):"—";
-  $("language").textContent=r.dominant;
-  $("emojiTotal").textContent=r.emojis.total.toLocaleString();
-  $("reactionTotal").textContent=(r.reactionTotal||0).toLocaleString();
-  $("confidence").textContent=Math.round(r.coverage)+"%";
-  $("confidenceBig").textContent=Math.round(r.coverage)+"%";
-  renderPulse(r);
-  renderDimensions(r);
-  renderBalance(r);
-  renderParticipants(r);
-  renderLanguages(r);
-  renderTone(r);
-  renderInsights(r);
-  renderTopics(r);
-  renderEmoji(r);
-  renderConflict(r);
-  renderSessions(r);
-  renderSocialOnly(r);
-  renderReactionIntegrity(r);
-  renderQuality(r);
-  renderRecommendationEngine(r);
-  renderModeration(r);
-  renderDynamicVocabulary(r);
-  renderTimelineSlice(r,Number($("timelineSlider")?.value||100));
-  renderStory(r);
-  drawCharts(r);
-}
-
-/* =========================================================
-   PULSE
-========================================================= */
-function renderPulse(r){
-  const deg=r.pulse*3.6;
-  $("score").style.background=`conic-gradient(var(--cyan) 0deg,var(--green) ${deg}deg,#172333 ${deg}deg 360deg)`;
-  $("pulse").textContent=r.pulse;
-  const labels=[["Participation balance",r.participation],["Initiation balance",r.initiation],["Responsiveness",r.replyScore],["Conversation depth",r.depth],["Relationship reciprocity",r.relation.score]];
-  $("meters").innerHTML=labels.map(([n,v])=>`<div><div class="meterhead"><span>${esc(n)}</span><b>${Math.round(v)}/100</b></div><div class="track"><div class="fill" style="width:${clamp(v)}%"></div></div></div>`).join("");
-}
-
-/* =========================================================
-   DIMENSIONS UI
-========================================================= */
-function buildDimensionToolbar(){
-  const list=[{id:"all",label:"All"},...Object.keys(DIMENSIONS).map(k=>({id:k,label:`${DIMENSIONS[k].icon} ${k}`}))];
-  $("dimensionToolbar").innerHTML=list.map((b,i)=>`<button class="dim-filter ${i===0?"active":""}" data-dim="${esc(b.id)}">${esc(b.label)}</button>`).join("");
-  document.querySelectorAll(".dim-filter").forEach(btn=>btn.onclick=()=>{
-    document.querySelectorAll(".dim-filter").forEach(x=>x.classList.remove("active"));
-    btn.classList.add("active");
+function buildDimensionButtons(){
+  const names=["All",...Object.keys(DIMENSIONS)];
+  $("dimToolbar").innerHTML=names.map((n,i)=>`<button class="dim ${i===0?"active":""}" data-d="${esc(n)}">${esc(n)}</button>`).join("");
+  document.querySelectorAll(".dim").forEach(b=>b.onclick=()=>{
+    document.querySelectorAll(".dim").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");
     if(LAST)renderDimensions(LAST);
   });
 }
+
 function renderDimensions(r){
-  const active=document.querySelector(".dim-filter.active")?.dataset.dim||"all";
-  const entries=Object.entries(r.dimensions).filter(([k])=>active==="all"||k===active).sort((a,b)=>b[1].result.score-a[1].result.score);
-  $("dimensionGrid").innerHTML=entries.map(([key,d])=>{
-    const s=d.result.score;
-    return `<div class="dimension"><div class="dimension-top"><div class="dimension-name">${d.icon} ${esc(key)}</div><div class="dimension-score cyan">${s}/100</div></div><div class="dimension-sub">${esc(d.description)}</div><div class="dimension-track"><i style="width:${s}%"></i></div><div class="dimension-meta">confidence ${d.result.confidence}% · ${d.result.lexicalHits} direct signals · reply coverage ${Math.round(d.result.replyRate)}%</div><div class="dimension-evidence">${d.result.evidence.length?d.result.evidence.slice(0,7).map(x=>`<span>${esc(x)}</span>`).join(""):"<span>structural metric</span>"}</div></div>`;
-  }).join("");
+  const active=document.querySelector(".dim.active")?.dataset.d||"All";
+  const arr=Object.entries(r.dimensions).filter(([n])=>active==="All"||n===active).sort((a,b)=>b[1].score-a[1].score);
+  $("dimGrid").innerHTML=arr.map(([n,d])=>`
+    <div class="dimension">
+      <div class="dtop"><span>${esc(n)}</span><span class="cyan">${d.score}</span></div>
+      <p>Observable communication signal derived from messages.</p>
+      <div class="track"><div class="fill" style="width:${d.score}%"></div></div>
+      <div class="evidence">${d.evidence.length?d.evidence.map(x=>`<span>${esc(x)}</span>`).join(""):"<span>structural metric</span>"}</div>
+    </div>`).join("");
 }
 
-/* =========================================================
-   BALANCE / INSIGHTS / PARTICIPANTS
-========================================================= */
-function renderBalance(r){
-  const top=r.sorted.slice(0,8),rel=r.relation;
-  const intro=`<div class="insight"><div class="tag2">PATTERN</div><p><b>${esc(rel.label)}</b> — ${esc(rel.detail)}</p><small>This describes measurable communication behavior, not private intentions.</small></div>`;
-  const rows=top.map(s=>{
-    const share=Math.round(pct(s.messages,r.total));
-    const start=Math.round(pct(s.starts,Math.max(1,r.sessions.length)));
-    return `<div class="row"><div class="rowmain"><div class="title">${esc(s.sender)}</div><div class="subtxt">${start}% session starts · ${s.questions} questions · avg reply ${s.replies.length?duration(mean(s.replies)):"—"}</div></div><strong class="cyan">${share}%</strong></div>`;
-  }).join("");
-  $("balance").innerHTML=intro+rows;
+function render(r){
+  $("mCount").textContent=r.total.toLocaleString();
+  $("wCount").textContent=r.totalWords.toLocaleString();
+  $("sCount").textContent=r.sessions.length;
+  $("rAvg").textContent=r.replies.length?duration(mean(r.replies)):"—";
+  $("langMix").textContent=r.dominant;
+  $("eCount").textContent=r.emojis.reduce((s,x)=>s+x[1],0);
+  $("qCount").textContent=r.quality+"%";
+  $("qualityBig").textContent=r.quality+"%";
+  $("pulse").textContent=r.pulse;
+  $("score").style.background=`conic-gradient(var(--cyan) 0deg,var(--green) ${r.pulse*3.6}deg,#172333 ${r.pulse*3.6}deg 360deg)`;
+
+  $("meters").innerHTML=[
+    ["Participation",r.relationScore],["Initiation",r.initiation],
+    ["Responsiveness",r.response],["Depth",r.depth]
+  ].map(x=>`<div><div class="mh"><span>${x[0]}</span><b>${Math.round(x[1])}</b></div><div class="track"><div class="fill" style="width:${clamp(x[1])}%"></div></div></div>`).join("");
+
+  renderDimensions(r);renderParticipants(r);renderRelation(r);renderLanguages(r);
+  renderTone(r);renderInsights(r);renderTopics(r);renderEmoji(r);
+  renderConflict(r);renderTimeline(r,100);renderCharts(r);
 }
+
 function renderParticipants(r){
   $("participants").innerHTML=r.sorted.map(s=>{
-    const share=Math.round(pct(s.messages,r.total));
-    return `<div><div class="barline"><span class="barlabel">${esc(s.sender)}</span><div class="track"><div class="fill" style="width:${share}%"></div></div><b>${share}%</b></div><div class="subtxt">${s.messages} messages · ${s.questions} questions · ${s.starts} starts</div></div>`;
+    const p=Math.round(pct(s.messages,r.total));
+    return `<div class="barline"><span style="overflow:hidden;text-overflow:ellipsis">${esc(s.sender)}</span><div class="track"><div class="fill" style="width:${p}%"></div></div><b>${p}%</b></div><div style="font-size:8px;color:var(--muted);margin-bottom:5px">${s.messages} messages · ${s.questions} questions · ${s.starts} starts</div>`;
   }).join("");
 }
+
+function renderRelation(r){
+  const label=r.relationScore>=65?"Mostly reciprocal":r.relationScore>=45?"Moderately uneven":"Strongly uneven";
+  $("relation").innerHTML=`
+    <div class="insight"><b>RELATIONSHIP PATTERN</b><p><strong>${label}</strong> — reciprocity score ${r.relationScore}/100.</p></div>
+    <div class="signalgrid" style="margin-top:8px">
+      <div class="signal"><b>${Math.round(r.initiation)}</b><span>initiation balance</span></div>
+      <div class="signal"><b>${Math.round(r.response)}</b><span>response signal</span></div>
+    </div>`;
+}
+
 function renderLanguages(r){
-  const items=Object.entries(r.langs).filter(x=>x[1]).sort((a,b)=>b[1]-a[1]);
-  $("languageDNA").innerHTML=items.map(([k,v])=>`<div class="signal"><strong>${esc(k)}</strong><span>${Math.round(pct(v,r.total))}% of messages</span></div>`).join("");
+  const x=Object.entries(r.languages).filter(a=>a[1]).sort((a,b)=>b[1]-a[1]);
+  $("languages").innerHTML=x.map(([n,v])=>`<div class="signal"><b>${esc(n)}</b><span>${Math.round(v/r.total*100)}% of messages</span></div>`).join("");
 }
+
 function renderTone(r){
-  const items=[["Positive signals",r.tone.positive,"green","Lexical warmth / approval"],["Conflict signals",r.tone.conflict,"red","Lexical friction"],["Apology signals",r.tone.apology,"gold","Repair / softening"],["Top words",r.topWords.slice(0,5).map(x=>x[0]).join(", ")||"—","cyan","Repeated content words"]];
-  $("tone").innerHTML=items.map(x=>`<div class="signal"><strong class="${x[2]}">${esc(String(x[1]))}</strong><span>${esc(x[0])} · ${esc(x[3])}</span></div>`).join("");
+  $("tone").innerHTML=[
+    ["Positive",r.positive,"green"],["Conflict",r.conflictWords,"red"],["Apology",r.apologies,"gold"],
+    ["Top words",r.messages.flatMap(m=>tokenize(m.text)).sort().slice(0,4).join(", "),"cyan"]
+  ].map(x=>`<div class="signal"><b class="${x[2]}">${esc(x[1])}</b><span>${x[0]}</span></div>`).join("");
 }
+
 function renderInsights(r){
-  const list=[];
-  list.push(["RELATIONSHIP PATTERN",`<b>${esc(r.relation.label)}</b> (${r.relation.score}/100). ${esc(r.relation.detail)}`,"Observable participation, starting and response behavior."]);
-  if(r.sorted.length>1){const [a,b]=r.sorted;list.push(["INITIATOR",`<b>${esc(a.sender)}</b> starts ${a.starts} sessions vs ${b.starts} for ${esc(b.sender)}.`,Math.abs(a.starts-b.starts)>1?"One side opens more sessions.":"Starting behavior is relatively shared."])}
-  const topDim=Object.entries(r.dimensions).sort((a,b)=>b[1].result.score-a[1].result.score)[0];
-  if(topDim)list.push(["DOMINANT DOMAIN",`${topDim[1].icon} <b>${esc(topDim[0])}</b> scores ${topDim[1].result.score}/100.`,topDim[1].description]);
-  if(r.conflicts.length){const c=r.conflicts.at(-1);list.push(["FRICTION WINDOW",`${r.conflicts.length} friction episode(s) detected; latest peaks around <b>${esc(c.peak.s||"multiple senders")}</b>.`,"This is a local language signal, not proof of a real argument."])}
-  else list.push(["FRICTION","No strong conflict cluster crossed the current threshold.","The detector did not find a concentrated friction spike."]);
-  if(r.replyTimes.length)list.push(["RESPONSE",`Average cross-sender response interval: <b>${duration(mean(r.replyTimes))}</b>.`,"Only responses within a 24-hour usable window are included."]);
-  $("insights").innerHTML=list.slice(0,6).map(x=>`<div class="insight"><div class="tag2">${esc(x[0])}</div><p>${x[1]}</p><small>${esc(x[2])}</small></div>`).join("");
+  const top=Object.entries(r.dimensions).sort((a,b)=>b[1].score-a[1].score)[0];
+  $("insights").innerHTML=`
+    <div class="insight"><b>STRONGEST DOMAIN</b><p>${esc(top?.[0]||"General conversation")} · ${top?.[1]?.score||0}/100</p></div>
+    <div class="insight"><b>SESSIONS</b><p>${r.sessions.length} conversation sessions detected.</p></div>
+    <div class="insight"><b>FRICTION</b><p>${r.conflicts.length} localized friction cluster(s).</p></div>`;
 }
 
-/* =========================================================
-   TOPICS / EMOJI / CONFLICT
-========================================================= */
 function renderTopics(r){
-  const arr=r.semanticTopics||r.topics;
-  if(!arr.length){$("topics").innerHTML='<div class="subtxt">Not enough evidence.</div>';return}
-  const max=Math.max(...arr.map(x=>x[1]),1);
-  $("topics").innerHTML=arr.map(([k,v])=>`<div class="topic"><span>${esc(k)}</span><div class="track"><div class="fill" style="width:${Math.round(v/max*100)}%"></div></div><b>${typeof v==="number"?v.toFixed(1):v}</b></div>`).join("");
+  const max=Math.max(...r.topics.map(x=>x[1]),1);
+  $("topics").innerHTML=r.topics.map(([n,v])=>`<div class="topic"><span>${esc(n)}</span><div class="track"><div class="fill" style="width:${v/max*100}%"></div></div><b>${v}</b></div>`).join("");
 }
+
 function renderEmoji(r){
-  $("emojiWrap").innerHTML=r.emojis.top.length?r.emojis.top.slice(0,12).map(([e,n])=>`<div class="emoji" title="Typed in message text — not a message reaction"><span>${e}</span><b>${n}</b></div>`).join(""):'<div class="subtxt">No text emoji detected.</div>';
+  $("emojiWrap").innerHTML=r.emojis.length?r.emojis.map(([e,n])=>`<div class="emoji">${e}<b>${n}</b></div>`).join(""):'<span style="font-size:9px;color:var(--muted)">No emoji detected.</span>';
 }
+
 function renderConflict(r){
-  if(!r.conflicts.length){$("conflictSummary").innerHTML='<div class="story"><h3 class="green">Low friction signal</h3><p>No concentrated conflict cluster crossed the threshold. This does not mean there were no disagreements.</p></div>';return}
-  const latest=r.conflicts.at(-1),peak=r.conflicts.reduce((a,b)=>b.score>a.score?b:a);
-  $("conflictSummary").innerHTML=`<div class="signalgrid"><div class="signal"><strong class="red">${r.conflicts.length}</strong><span>friction episodes</span></div><div class="signal"><strong class="orange">${new Date(latest.start).toLocaleDateString("en-US",{month:"short",day:"numeric"})}</strong><span>latest episode</span></div><div class="signal"><strong>${esc(peak.peak.s||"—")}</strong><span>highest message signal</span></div><div class="signal"><strong>${peak.score.toFixed(1)}</strong><span>peak cluster score</span></div></div>`;
-}
-function renderTrends(r){
-  const n=Math.max(10,Math.floor(r.total*.2));
-  const a=r.messages.slice(0,n),b=r.messages.slice(-n);
-  const avgA=mean(a.map(m=>m.replyMs).filter(Number.isFinite))/60000;
-  const avgB=mean(b.map(m=>m.replyMs).filter(Number.isFinite))/60000;
-  const metrics=[["Message length",mean(a.map(x=>x.words)),mean(b.map(x=>x.words),"words"),"words"],["Question rate",pct(a.filter(x=>isQuestion(x.text)).length,a.length),pct(b.filter(x=>isQuestion(x.text)).length,b.length),"%"],["Reply time",avgA||0,avgB||0,"min"]];
-  $("trends").innerHTML=metrics.map(([name,x,y,u])=>{const d=x?(y-x)/Math.abs(x)*100:0;const cls=Math.abs(d)<5?"gold":d>0?"green":"red";return `<div class="signal"><strong>${x.toFixed(1)} → ${y.toFixed(1)} ${u}</strong><span>${esc(name)} · <b class="${cls}">${d>=0?"+":""}${d.toFixed(0)}%</b> early → recent</span></div>`}).join("");
-}
-function renderSessions(r){
-  $("sessions").innerHTML=r.sessions.slice(-10).reverse().map((s,i)=>{const people=new Set(s.messages.map(m=>m.sender)).size;return `<div class="row"><div class="rowmain"><div class="title">Session ${r.sessions.length-i}</div><div class="subtxt">${dateLabel(s.start)} · ${s.messages.length} messages · ${people} participants</div></div><strong class="violet">${duration(s.end-s.start)}</strong></div>`}).join("");
+  $("conflict").innerHTML=r.conflicts.length
+    ?`<div class="signalgrid"><div class="signal"><b class="red">${r.conflicts.length}</b><span>episodes</span></div><div class="signal"><b class="gold">${r.conflicts.at(-1).score.toFixed(1)}</b><span>latest score</span></div></div>`
+    :`<div class="insight"><b class="green">LOW FRICTION</b><p>No concentrated friction cluster crossed the threshold.</p></div>`;
 }
 
-/* =========================================================
-   REACTION / QUALITY UI
-========================================================= */
-function renderReactionIntegrity(r){
-  $("integrityGrid").innerHTML=`
-    <div class="integrity-box"><strong class="pink">${REACTION_STATS.total}</strong><span>raw reaction records supplied</span></div>
-    <div class="integrity-box"><strong class="green">${REACTION_STATS.mapped}</strong><span>safely mapped to unique target messages</span></div>
-    <div class="integrity-box"><strong class="gold">${REACTION_STATS.ambiguous}</strong><span>ambiguous targets rejected instead of guessed</span></div>
-    <div class="integrity-box"><strong class="red">${REACTION_STATS.orphan}</strong><span>unmatched target records rejected</span></div>
-    <div class="integrity-box"><strong class="cyan">${r.emojis.total}</strong><span>emoji occurrences typed inside message text</span></div>`;
-}
-function calculateQuality(r){
-  const parseQuality=clamp(70+Math.min(25,r.messages.length/20));
-  const timingQuality=clamp(45+Math.min(55,r.replyTimes.length/Math.max(1,r.total)*130));
-  const reactionQuality=REACTION_STATS.total?clamp(REACTION_STATS.mapped/REACTION_STATS.total*100):100;
-  const participantQuality=clamp(60+r.names.length*10);
-  const semanticQuality=NEURAL?100:45;
-  const overall=Math.round(parseQuality*.25+timingQuality*.25+reactionQuality*.15+participantQuality*.2+semanticQuality*.15);
-  return {parseQuality,timingQuality,reactionQuality,participantQuality,semanticQuality,overall};
-}
-function renderQuality(r){
-  const q=calculateQuality(r);
-  $("qualityGrid").innerHTML=`
-    <div class="quality-item"><strong class="cyan">${Math.round(q.overall)}%</strong><span>overall analysis quality</span></div>
-    <div class="quality-item"><strong>${Math.round(q.parseQuality)}%</strong><span>message parsing confidence</span></div>
-    <div class="quality-item"><strong>${Math.round(q.timingQuality)}%</strong><span>timing / response evidence</span></div>
-    <div class="quality-item"><strong>${Math.round(q.reactionQuality)}%</strong><span>reaction mapping reliability${REACTION_STATS.total?"":" (no reaction dataset)"}</span></div>`;
+function renderTimeline(r,p){
+  const n=Math.max(1,Math.ceil(r.total*p/100)),x=r.messages.slice(0,n);
+  const reply=x.map(m=>m.replyMs).filter(Number.isFinite),q=x.filter(m=>question(m.text)).length;
+  const wordsCount=x.reduce((s,m)=>s+m.words,0),conflict=x.reduce((s,m)=>s+lex(m.text,CONFLICT),0),emo=x.reduce((s,m)=>s+emojis(m.text).length,0);
+  $("timelineLabel").textContent=`${p}% of conversation`;
+  $("timelineMetrics").innerHTML=[
+    [x.length,"messages"],[wordsCount,"words"],[q,"questions"],[conflict,"friction"],
+    [emo,"typed emoji"],[reply.length?duration(mean(reply)):"—","avg reply"]
+  ].map(a=>`<div class="tm"><b>${a[0]}</b><span>${a[1]}</span></div>`).join("");
 }
 
-/* =========================================================
-   TIMELINE
-========================================================= */
-function renderTimelineSlice(r,percent){
-  if(!r||!r.messages.length)return;
-  const end=Math.max(1,Math.ceil(r.messages.length*percent/100));
-  const slice=r.messages.slice(0,end);
-  const wordsCount=slice.reduce((s,m)=>s+m.words,0);
-  const questions=slice.filter(m=>isQuestion(m.text)).length;
-  const conflicts=slice.reduce((s,m)=>s+includesLex(m.text,CONFLICT),0);
-  const typedEmoji=slice.reduce((s,m)=>s+getEmojis(m.text).length,0);
-  const reactions=slice.reduce((s,m)=>s+(m.reactions?.length||0),0);
-  const reply=slice.map(m=>m.replyMs).filter(Number.isFinite);
-  $("timelineValue").textContent=`${percent}% of conversation`;
-  $("timelineMetrics").innerHTML=`
-    <div class="timeline-metric"><strong>${slice.length}</strong><span>messages</span></div>
-    <div class="timeline-metric"><strong>${wordsCount}</strong><span>words</span></div>
-    <div class="timeline-metric"><strong>${questions}</strong><span>questions</span></div>
-    <div class="timeline-metric"><strong>${conflicts}</strong><span>friction markers</span></div>
-    <div class="timeline-metric"><strong>${typedEmoji}</strong><span>typed emoji</span></div>
-    <div class="timeline-metric"><strong>${reactions}</strong><span>mapped reactions</span></div>
-    <div class="timeline-metric"><strong>${reply.length?duration(mean(reply)):"—"}</strong><span>avg response</span></div>`;
-}
+function destroyCharts(){Object.values(charts).forEach(c=>{try{c.destroy()}catch{}});charts={}}
 
-/* =========================================================
-   SOCIAL + OPEN VOCABULARY
-========================================================= */
-function renderSocialOnly(r){
-  const ranked=socialRankMessages(r).slice(0,8);
-  $("socialRankList").innerHTML=ranked.length?ranked.map((m,i)=>`<div class="rank-item"><div class="rank-pos">#${i+1}</div><div class="rank-main"><div class="rank-title">${esc(m.sender)} · ${esc(m.text.replace(/\n/g," "))}</div><div class="rank-meta">typed emoji ${getEmojis(m.text).length} · reactions ${m.reactions?.length||0} · ${m.rankReasons.reply?"reply follows":"no direct reply"}</div><div class="rank-meter"><i style="width:${Math.round(m.socialRank)}%"></i></div></div><div class="rank-score">${Math.round(m.socialRank)}</div></div>`).join(""):'<div class="subtxt">No messages available for ranking.</div>';
-  if(r.reactionTotal){
-    const top=r.messages.filter(m=>m.reactions?.length).sort((a,b)=>b.reactionScore-a.reactionScore).slice(0,5);
-    const summary=`<div class="signalgrid"><div class="signal"><strong class="gold">${r.reactionTotal}</strong><span>safely mapped reactions</span></div><div class="signal"><strong class="cyan">${Object.keys(r.reactionByEmoji||{}).length}</strong><span>reaction types</span></div></div>`;
-    const msgs=top.map(m=>`<div class="reaction-message"><div class="reaction-message-top"><strong>${esc(m.sender)}</strong><span class="reaction-count">${m.reactions.length} reaction${m.reactions.length>1?"s":""}</span></div><div class="subtxt">${esc(m.text.slice(0,125))}</div><div class="reaction-pills">${m.reactions.map(x=>`<span class="reaction-pill">${x.emoji} <small>${esc(x.reactor)}</small></span>`).join("")}</div></div>`).join("");
-    $("reactionInsight").innerHTML=summary+msgs;
-  }
-  const vocab=r.semanticOpenVocab||r.openVocab||{};
-  $("openVocabGrid").innerHTML=Object.entries(vocab).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([k,v])=>`<div class="emotion-card"><div class="emotion-top"><b>${esc(k)}</b><span class="emotion-score">${Math.round(v)}</span></div><div class="emotion-bar"><i style="width:${clamp(v)}%"></i></div></div>`).join("");
-}
-
-/* =========================================================
-   STORY
-========================================================= */
-function renderStory(r){
-  const strongest=Object.entries(r.dimensions).sort((a,b)=>b[1].result.score-a[1].result.score)[0];
-  const topTopic=(r.semanticTopics||r.topics)[0]?.[0]||"general conversation";
-  const text=`The conversation is ${r.relation.label.toLowerCase()} based on observable participation, session starts and response timing. The strongest domain signal is ${strongest?.[0]||"general communication"} at ${strongest?.[1]?.result?.score||0}/100. The strongest topic signal is ${topTopic}. ${r.conflicts.length} localized friction episode(s) were detected.`;
-  $("story").innerHTML=`<h3>Your conversation at a glance</h3><p>${esc(text)}</p>`;
-}
-
-/* =========================================================
-   CHARTS
-========================================================= */
-const chartOpts={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:"#7c90a5",font:{size:9}}},y:{grid:{color:"rgba(255,255,255,.05)"},ticks:{color:"#7c90a5",font:{size:9}}}}};
-function destroyCharts(){Object.values(charts).forEach(c=>{try{c.destroy()}catch(_){}});charts={}}
-function drawCharts(r){
+function renderCharts(r){
   if(!window.Chart)return;
   destroyCharts();
-  const names=r.sorted.map(x=>x.sender).slice(0,6);
-  const start=names.map(n=>r.by[n].starts),reply=names.map(n=>r.by[n].replies.length);
-  charts.init=new Chart($("initChart"),{type:"bar",data:{labels:names,datasets:[{label:"Session starts",data:start,backgroundColor:"rgba(79,216,255,.70)",borderRadius:7},{label:"Direct replies",data:reply,backgroundColor:"rgba(167,139,250,.65)",borderRadius:7}]},options:{...chartOpts,plugins:{legend:{display:true,labels:{color:"#a7b6c6",font:{size:9}}}}}});
-  const t=r.trend;
-  charts.energy=new Chart($("energyChart"),{type:"line",data:{labels:t.map(x=>x.label),datasets:[{label:"Messages",data:t.map(x=>x.volume),borderColor:"#4fd8ff",backgroundColor:"rgba(79,216,255,.08)",fill:true,tension:.35,pointRadius:2}]},options:chartOpts});
-  charts.emoji=new Chart($("emojiChart"),{type:"doughnut",data:{labels:r.emojis.top.slice(0,7).map(x=>x[0]),datasets:[{data:r.emojis.top.slice(0,7).map(x=>x[1]),backgroundColor:["#4fd8ff","#a78bfa","#31e891","#ffc857","#ff6685","#ff995a","#5b7cff"],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"right",labels:{color:"#a7b6c6",font:{size:9}}}}}});
-  charts.conflict=new Chart($("conflictChart"),{type:"line",data:{labels:t.map(x=>x.label),datasets:[{label:"Friction markers",data:t.map(x=>x.conflict),borderColor:"#ff6685",backgroundColor:"rgba(255,102,133,.10)",fill:true,tension:.35,pointRadius:2}]},options:chartOpts});
-  charts.trend=new Chart($("trendChart"),{type:"line",data:{labels:t.map(x=>x.label),datasets:[{label:"Avg words",data:t.map(x=>x.avgWords),borderColor:"#4fd8ff",tension:.35,pointRadius:2},{label:"Reply time",data:t.map(x=>x.avgReply),borderColor:"#a78bfa",tension:.35,pointRadius:2},{label:"Positive",data:t.map(x=>x.positive),borderColor:"#31e891",tension:.35,pointRadius:2}]},options:{...chartOpts,plugins:{legend:{display:true,labels:{color:"#a7b6c6",font:{size:9}}}}}});
-}
+  const names=r.sorted.slice(0,6).map(x=>x.sender);
 
-/* =========================================================
-   TRANSFORMER / EMBEDDINGS / ZERO-SHOT
-========================================================= */
-async function loadNeural(){
-  if(NEURAL)return NEURAL;
-  if(NEURAL_LOADING)return null;
-  NEURAL_LOADING=true;
-  $("semanticBtn").textContent="Loading Transformer engine…";
-  $("status").textContent="Loading multilingual Transformer models. The first load may be large.";
-  try{
-    const mod=await import("https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1");
-    const {pipeline}=mod;
-    EMBEDDER=await pipeline("feature-extraction","Xenova/paraphrase-multilingual-MiniLM-L12-v2",{dtype:"q8"});
-    try{ZERO_SHOT=await pipeline("zero-shot-classification","Xenova/nli-deberta-v3-xsmall",{dtype:"q8"})}catch(err){console.warn("Zero-shot unavailable",err)}
-    try{IMAGE_ZERO_SHOT=await pipeline("zero-shot-image-classification","Xenova/clip-vit-base-patch32")}catch(err){console.warn("Vision classifier unavailable",err)}
-    try{IMAGE_CAPTIONER=await pipeline("image-to-text","Xenova/vit-gpt2-image-captioning")}catch(err){console.warn("Image captioner unavailable",err)}
-    NEURAL=mod;
-    $("semanticBtn").textContent="Transformer Engine ✓";
-    $("status").textContent="✓ Transformer engine ready.";
-    if(LAST){await applySemantic(LAST);await computeSemanticOpenVocab(LAST);renderQuality(LAST)}
-    return NEURAL;
-  }catch(err){
-    console.error(err);
-    $("semanticBtn").textContent="Retry Transformer Engine";
-    $("status").textContent="Transformer loading failed. Local analysis remains active.";
-    return null;
-  }finally{NEURAL_LOADING=false}
-}
-async function embedding(texts){
-  if(!EMBEDDER||!texts?.length)return [];
-  const output=await EMBEDDER(texts.map(x=>String(x||"").trim().slice(0,1400)),{pooling:"mean",normalize:true});
-  return output.tolist();
-}
-function cosine(a,b){
-  if(!a||!b||a.length!==b.length)return 0;
-  let dot=0,na=0,nb=0;
-  for(let i=0;i<a.length;i++){dot+=a[i]*b[i];na+=a[i]*a[i];nb+=b[i]*b[i]}
-  return dot/(Math.sqrt(na)*Math.sqrt(nb)||1);
-}
-const ZERO_SHOT_LABELS=["romantic interest","friendship","emotional support","flirting","jealousy","conflict","apology","planning to meet","casual conversation","humor","emotional distance","uncertainty","affection","asking for reassurance","work or study","financial discussion","sports and fitness","family","travel"];
-async function zeroShotAnalyze(text){
-  if(!ZERO_SHOT)return null;
-  const result=await ZERO_SHOT(String(text).slice(0,1800),ZERO_SHOT_LABELS,{multi_label:true});
-  return result.labels.map((label,i)=>({label,score:result.scores[i]}));
-}
-async function applySemantic(r){
-  if(!EMBEDDER)return;
-  try{
-    const sample=r.messages.length>160?r.messages.filter((_,i)=>i%Math.ceil(r.messages.length/160)===0).slice(0,160):r.messages;
-    const em=await embedding(sample.map(m=>m.text));
-    const seeds=await embedding(Object.entries(TOPICS).map(([k,v])=>`${k}: ${v.slice(0,12).join(", ")}`));
-    const scores=Object.fromEntries(Object.keys(TOPICS).map(k=>[k,0]));
-    for(let i=0;i<em.length;i++)for(let j=0;j<seeds.length;j++)scores[Object.keys(TOPICS)[j]]+=Math.max(0,cosine(em[i],seeds[j]));
-    r.semanticTopics=Object.entries(scores).sort((a,b)=>b[1]-a[1]).slice(0,8);
-    if(ZERO_SHOT){
-      r.zeroShot=[];
-      for(const m of sample.slice(0,80)){const z=await zeroShotAnalyze(m.text);if(z)r.zeroShot.push({messageIndex:m.index,timestamp:m.ts,sender:m.sender,labels:z})}
-    }
-    renderAdvancedSemantic(r);
-    renderTopics(r);
-    $("status").textContent="✓ Semantic embeddings and zero-shot signals updated.";
-  }catch(err){console.error(err);$("status").textContent="Semantic layer partially failed; local results remain active."}
-}
-async function computeSemanticOpenVocab(r){
-  if(!EMBEDDER)return;
-  try{
-    const entries=Object.entries(EMOTION_PROTOTYPES);
-    const protos=await embedding(entries.map(([,v])=>v.join("; ")));
-    const sample=r.messages.length>160?r.messages.filter((_,i)=>i%Math.ceil(r.messages.length/160)===0).slice(0,160):r.messages;
-    const embs=await embedding(sample.map(m=>m.text));
-    const vals={};
-    for(let j=0;j<entries.length;j++){
-      const [k]=entries[j];
-      let total=0;
-      for(let i=0;i<embs.length;i++)total+=Math.max(0,cosine(embs[i],protos[j]));
-      vals[k]=clamp(total/Math.max(1,embs.length)*100);
-    }
-    r.semanticOpenVocab=vals;
-    renderSocialOnly(r);
-  }catch(err){console.warn("semantic open vocab failed",err)}
-}
-function renderAdvancedSemantic(r){
-  const entries=r.zeroShot||[];
-  if(!entries.length){
-    $("semanticConfidence").textContent=EMBEDDER?"READY":"—";
-    $("semanticLabels").innerHTML=`<div class="subtxt">Embedding layer is available; zero-shot labels were not returned.</div>`;
-    return;
-  }
-  const aggregate={};
-  for(const item of entries)for(const label of item.labels)aggregate[label.label]=(aggregate[label.label]||0)+label.score;
-  const finalScores=Object.entries(aggregate).map(([label,total])=>({label,score:total/Math.max(1,entries.length)})).sort((a,b)=>b.score-a.score).slice(0,12);
-  const confidence=Math.round(finalScores.reduce((s,x)=>s+x.score,0)/Math.max(1,finalScores.length)*100);
-  $("semanticConfidence").textContent=`${clamp(confidence)}%`;
-  $("semanticLabels").innerHTML=finalScores.map(x=>{const p=Math.round(x.score*100);return `<div class="semantic-label"><div class="semantic-label-top"><strong>${esc(x.label)}</strong><span class="cyan">${p}%</span></div><div class="semantic-label-track"><i style="width:${p}%"></i></div></div>`}).join("");
-  drawSemanticChart(finalScores);
-}
-function drawSemanticChart(data){
-  if(!window.Chart)return;
-  if(charts.semantic){try{charts.semantic.destroy()}catch(_){} }
-  charts.semantic=new Chart($("semanticChart"),{type:"bar",data:{labels:data.map(x=>x.label),datasets:[{label:"Semantic probability",data:data.map(x=>x.score*100),borderRadius:8}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:"y",plugins:{legend:{display:false}},scales:{x:{min:0,max:100},y:{grid:{display:false}}}}});
-}
+  charts.init=new Chart($("initChart"),{
+    type:"bar",
+    data:{labels:names,datasets:[
+      {data:names.map(n=>r.by[n].starts),backgroundColor:"#4fd8ff",label:"Starts"},
+      {data:names.map(n=>r.by[n].replies.length),backgroundColor:"#a78bfa",label:"Replies"}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false}
+  });
 
-/* =========================================================
-   MULTIMODAL IMAGE / VIDEO KEYFRAME
-========================================================= */
-const VISION_LABELS=["romantic content","friends","food","travel","party","work","study","screenshot","person","animal","nature","funny content","celebration","sports or fitness"];
-function extractVideoFrame(file){
-  return new Promise((resolve,reject)=>{
-    const video=document.createElement("video");
-    const url=URL.createObjectURL(file);
-    video.src=url;video.muted=true;video.playsInline=true;
-    video.addEventListener("loadedmetadata",()=>{video.currentTime=Math.min(2,Math.max(0,video.duration/2))});
-    video.addEventListener("seeked",()=>{
-      const canvas=document.createElement("canvas");
-      canvas.width=Math.min(1280,video.videoWidth);
-      canvas.height=Math.round(canvas.width*video.videoHeight/video.videoWidth);
-      const ctx=canvas.getContext("2d");ctx.drawImage(video,0,0,canvas.width,canvas.height);
-      canvas.toBlob(blob=>{URL.revokeObjectURL(url);resolve(blob)},"image/jpeg",.88);
-    });
-    video.addEventListener("error",reject);
+  charts.energy=new Chart($("energyChart"),{
+    type:"line",
+    data:{labels:r.trend.map(x=>x.label),datasets:[{label:"Messages",data:r.trend.map(x=>x.volume),borderColor:"#4fd8ff",tension:.35}]},
+    options:{responsive:true,maintainAspectRatio:false}
+  });
+
+  charts.emoji=new Chart($("emojiChart"),{
+    type:"doughnut",
+    data:{
+      labels:r.emojis.slice(0,7).map(x=>x[0]),
+      datasets:[{data:r.emojis.slice(0,7).map(x=>x[1]),backgroundColor:["#4fd8ff","#a78bfa","#31e891","#ffc857","#ff6685","#ff995a","#5b7cff"]}]
+    },
+    options:{responsive:true,maintainAspectRatio:false}
+  });
+
+  charts.conflict=new Chart($("conflictChart"),{
+    type:"line",
+    data:{labels:r.trend.map(x=>x.label),datasets:[{label:"Conflict",data:r.trend.map(x=>x.conflict),borderColor:"#ff6685",tension:.35}]},
+    options:{responsive:true,maintainAspectRatio:false}
+  });
+
+  charts.trend=new Chart($("trendChart"),{
+    type:"line",
+    data:{
+      labels:r.trend.map(x=>x.label),
+      datasets:[
+        {label:"Words",data:r.trend.map(x=>x.words),borderColor:"#4fd8ff",tension:.35},
+        {label:"Reply",data:r.trend.map(x=>x.reply),borderColor:"#a78bfa",tension:.35},
+        {label:"Positive",data:r.trend.map(x=>x.positive),borderColor:"#31e891",tension:.35}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false}
   });
 }
-async function analyzeMedia(file){
-  if(!await loadNeural())return;
-  try{
-    $("mediaResults").innerHTML=`<div class="story"><h3>Analyzing visual content…</h3><p>Processing the image or representative video keyframe.</p></div>`;
-    let source=file;
-    let isVideo=false;
-    if(file.type.startsWith("video/")){isVideo=true;source=await extractVideoFrame(file)}
-    const result={isVideo,labels:[],caption:""};
-    if(IMAGE_ZERO_SHOT)result.labels=await IMAGE_ZERO_SHOT(source,VISION_LABELS);
-    if(IMAGE_CAPTIONER){const cap=await IMAGE_CAPTIONER(source);result.caption=cap?.[0]?.generated_text||""}
-    MEDIA_DATA=result;
-    renderMediaAnalysis(result);
-  }catch(err){
-    console.error(err);
-    $("mediaResults").innerHTML=`<div class="story"><h3 class="red">Vision analysis failed</h3><p>The visual model could not process this file.</p></div>`;
-  }
-}
-function renderMediaAnalysis(result){
-  const top=(result.labels||[]).slice().sort((a,b)=>b.score-a.score).slice(0,8);
-  $("mediaResults").innerHTML=`<div class="media-grid">
-    <div class="media-card"><h3>${result.isVideo?"Video keyframe":"Image"}</h3><p class="subtxt">${result.isVideo?"A representative keyframe was analyzed; this is not claimed to be full-video understanding.":"The image was analyzed directly."}</p></div>
-    <div class="media-card"><h3>Caption</h3><p>${esc(result.caption||"No caption returned.")}</p></div>
-    <div class="media-card"><h3>Visual labels</h3><div class="media-labels">${top.map(x=>`<div class="media-label"><b>${esc(x.label)}</b><span>${Math.round(x.score*100)}%</span></div>`).join("")||"<span class='subtxt'>No visual labels returned.</span>"}</div></div>
-  </div>`;
-}
 
-/* =========================================================
-   FILE HANDLING
-========================================================= */n
-const drop=$("dropZone"),file=$("file");
-file.addEventListener("change",e=>e.target.files[0]&&loadFile(e.target.files[0]));
-$("reactionFile").addEventListener("change",e=>e.target.files[0]&&loadReactionFile(e.target.files[0]));
-$("mediaFile").addEventListener("change",e=>e.target.files[0]&&analyzeMedia(e.target.files[0]));
-function loadReactionFile(f){
+function loadFile(f){
+  if(!f)return;
+  if(!/\.txt$/i.test(f.name)){
+    $("error").textContent="Please select a WhatsApp .txt export.";
+    $("error").style.display="block";
+    return;
+  }
+  $("error").style.display="none";
+  $("fileName").textContent="✓ "+f.name;
+  $("status").textContent="Reading file…";
   const reader=new FileReader();
   reader.onload=e=>{
-    try{
-      const raw=e.target.result;
-      let data=/\.json$/i.test(f.name)?JSON.parse(raw):parseReactionLines(raw);
-      REACTION_DATA=normalizeReactionData(data);
-      if(!REACTION_DATA.length)throw new Error("No reaction records found");
-      if(LAST){attachReactions(LAST);render(LAST)}
-      $("reactionStatus").textContent=`✓ ${REACTION_DATA.length} reaction records loaded`;
-    }catch(err){console.error(err);$("reactionStatus").textContent="Could not read reaction data."}
+    const text=String(e.target.result||"");
+    if(!text.trim()){
+      $("error").textContent="The selected file is empty.";
+      $("error").style.display="block";
+      return;
+    }
+    $("status").textContent="Analyzing conversation…";
+    analyze(text);
+  };
+  reader.onerror=()=>{
+    $("error").textContent="Could not read this file.";
+    $("error").style.display="block";
+    $("status").textContent="";
   };
   reader.readAsText(f,"UTF-8");
 }
-["dragenter","dragover"].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.add("drag")}));
-["dragleave","drop"].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.remove("drag")}));
-drop.addEventListener("drop",e=>{const f=e.dataTransfer.files[0];if(f)loadFile(f)});
-function loadFile(f){
-  if(!/\.txt$/i.test(f.name)){fail("Please choose a WhatsApp .txt export.");return}
-  $("fileName").textContent="✓ "+f.name;
-  $("status").textContent="Parsing messages, timing, dimensions and patterns…";
-  $("error").style.display="none";
-  const reader=new FileReader();
-  reader.onload=e=>{try{analyze(e.target.result)}catch(err){console.error(err);fail("Could not safely analyze this export.")}};
-  reader.onerror=()=>fail("Could not read the file.");
-  reader.readAsText(f,"UTF-8");
+
+$("file").addEventListener("change",e=>{if(e.target.files?.[0])loadFile(e.target.files[0])});
+
+["dragenter","dragover"].forEach(type=>{
+  $("drop").addEventListener(type,e=>{
+    e.preventDefault();e.stopPropagation();$("drop").style.borderColor="var(--cyan)";
+  });
+});
+
+["dragleave","drop"].forEach(type=>{
+  $("drop").addEventListener(type,e=>{
+    e.preventDefault();e.stopPropagation();$("drop").style.borderColor="#29455e";
+  });
+});
+
+$("drop").addEventListener("drop",e=>{
+  const f=e.dataTransfer?.files?.[0];
+  if(f)loadFile(f);
+});
+
+$("timeline").addEventListener("input",e=>{
+  if(LAST)renderTimeline(LAST,Number(e.target.value));
+});
+
+function download(text,name,type){
+  const blob=new Blob([text],{type}),url=URL.createObjectURL(blob),a=document.createElement("a");
+  a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),100);
 }
 
-/* =========================================================
-   EXPORTS
-========================================================= */
-function downloadText(text,filename,type){
-  const blob=new Blob([text],{type});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement("a");
-  a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
-}
-function exportJSON(){
-  if(!LAST){toast("Analyze a conversation first.");return}
-  const payload={
+$("jsonBtn").onclick=()=>{
+  if(!LAST)return alert("Analyze a conversation first.");
+  const data={
     generatedAt:new Date().toISOString(),
-    summary:{pulse:LAST.pulse,confidence:LAST.coverage,messages:LAST.total,words:LAST.totalWords,participants:LAST.names,sessions:LAST.sessions.length},
-    dimensions:Object.fromEntries(Object.entries(LAST.dimensions).map(([k,v])=>[k,v.result])),
+    summary:{
+      messages:LAST.total,words:LAST.totalWords,participants:LAST.names,
+      sessions:LAST.sessions.length,pulse:LAST.pulse,quality:LAST.quality,
+      dominantLanguage:LAST.dominant
+    },
+    relationship:{
+      reciprocity:LAST.relationScore,
+      initiation:LAST.initiation,
+      responsiveness:LAST.response
+    },
+    topics:LAST.topics,
+    dimensions:LAST.dimensions,
     emojis:LAST.emojis,
-    reactions:{total:LAST.reactionTotal||0,stats:REACTION_STATS,byEmoji:LAST.reactionByEmoji||{}},
-    relationship:LAST.relation,
-    topics:LAST.semanticTopics||LAST.topics,
     conflicts:LAST.conflicts,
-    languages:LAST.langs,
-    semantic:LAST.zeroShot||null
+    languages:LAST.languages
   };
-  downloadText(JSON.stringify(payload,null,2),"convolens-analysis.json","application/json");
-}
-function exportCSV(){
-  if(!LAST){toast("Analyze a conversation first.");return}
-  const rows=[["index","date","time","sender","text","typedEmojiCount","reactionCount","replyMs","words"]];
-  for(const m of LAST.messages)rows.push([m.index,m.date,m.time,m.sender,m.text.replace(/\n/g," "),getEmojis(m.text).length,m.reactions?.length||0,Number.isFinite(m.replyMs)?m.replyMs:"",m.words]);
+  download(JSON.stringify(data,null,2),"convolens-analysis.json","application/json");
+};
+
+$("csvBtn").onclick=()=>{
+  if(!LAST)return alert("Analyze a conversation first.");
+  const rows=[["index","date","time","sender","text","words","emoji","replyMs"]];
+  LAST.messages.forEach(m=>rows.push([
+    m.index,m.date,m.time,m.sender,m.text.replace(/\n/g," "),m.words,emojis(m.text).length,
+    Number.isFinite(m.replyMs)?m.replyMs:""
+  ]));
   const csv=rows.map(row=>row.map(x=>`"${String(x).replace(/"/g,'""')}"`).join(",")).join("\n");
-  downloadText(csv,"convolens-messages.csv","text/csv;charset=utf-8");
-}
-$("exportJsonBtn").onclick=exportJSON;
-$("exportCsvBtn").onclick=exportCSV;
+  download(csv,"convolens-messages.csv","text/csv;charset=utf-8");
+};
 
-/* =========================================================
-   SEARCH / FILTER
-========================================================= */
-
-/* =========================================================
-   PRO / STRIPE
-========================================================= */
-function toast(msg){
-  $("toast").textContent=msg;
-  $("toast").style.display="block";
-  setTimeout(()=>$("toast").style.display="none",4500);
-}
-$("proBtn").onclick=()=>$("proModal").style.display="grid";
-$("closeModal").onclick=()=>$("proModal").style.display="none";
-$("cancelPro").onclick=()=>$("proModal").style.display="none";
-$("proModal").addEventListener("click",e=>{if(e.target===$("proModal"))$("proModal").style.display="none"});
-$("checkoutBtn").onclick=async()=>{
+$("transformerBtn").onclick=async()=>{
+  const box=$("semanticState");
+  box.innerHTML="<b>LOADING</b><p>Loading optional multilingual Transformer engine…</p>";
   try{
-    $("checkoutBtn").disabled=true;
-    $("checkoutBtn").textContent="Opening secure checkout…";
-    const res=await fetch("/api/create-checkout-session",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({plan:"pro_monthly"})});
-    if(!res.ok)throw new Error("Checkout endpoint unavailable");
-    const data=await res.json();
-    if(!data.url)throw new Error("No checkout URL returned");
-    window.location.href=data.url;
+    const mod=await import("https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1");
+    const pipe=mod.pipeline;
+    const model=await pipe("feature-extraction","Xenova/paraphrase-multilingual-MiniLM-L12-v2",{dtype:"q8"});
+    const sample=LAST?LAST.messages.slice(-30).map(m=>m.text):["hello"];
+    const result=await model(sample,{pooling:"mean",normalize:true});
+    box.innerHTML=`<b class="green">TRANSFORMER READY</b><p>Multilingual embeddings loaded successfully. ${result.tolist().length} messages were processed.</p>`;
   }catch(err){
     console.error(err);
-    toast("Secure checkout is not connected yet. Add /api/create-checkout-session on your backend.");
-    $("checkoutBtn").disabled=false;
-    $("checkoutBtn").textContent="Continue to secure checkout";
+    box.innerHTML=`<b class="red">TRANSFORMER UNAVAILABLE</b><p>Core ConvoLens analysis still works normally.</p>`;
   }
 };
 
-/* =========================================================
-   AI STORY BACKEND
-========================================================= */
-$("aiBtn").onclick=async()=>{
-  if(!LAST){toast("Analyze a conversation first.");return}
-  try{
-    $("aiBtn").disabled=true;
-    $("aiBtn").textContent="Generating…";
-    const payload={metrics:{pulse:LAST.pulse,relationshipPattern:LAST.relation,topTopics:(LAST.semanticTopics||LAST.topics).slice(0,8),dimensions:Object.fromEntries(Object.entries(LAST.dimensions).map(([k,v])=>[k,v.result])),conflictCount:LAST.conflicts.length,avgReplyMs:LAST.replyTimes.length?mean(LAST.replyTimes):null,languages:LAST.langs,trend:LAST.trend.slice(-8),reactionIntegrity:REACTION_STATS}};
-    const res=await fetch("/api/ai-insights",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
-    if(!res.ok)throw new Error("AI endpoint unavailable");
-    const data=await res.json();
-    $("story").innerHTML=`<h3>AI Story</h3><p>${esc(data.story||"No story returned.")}</p>`;
-  }catch(err){console.error(err);toast("AI Story needs your secure backend at /api/ai-insights.")}
-  finally{$("aiBtn").disabled=false;$("aiBtn").innerHTML='Generate AI Story <span style="color:#d8bdff">PRO</span>'}
-};
-
-/* =========================================================
-   TIMELINE
-========================================================= */
-$("timelineSlider").addEventListener("input",e=>{if(LAST)renderTimelineSlice(LAST,Number(e.target.value))});
-$("semanticBtn").onclick=loadNeural;
-
-/* =========================================================
-   ERROR + BOOT
-========================================================= */
-function fail(msg){$("error").textContent=msg;$("error").style.display="block";$("status").textContent=""}
-buildDimensionToolbar();
-$("profileMode")?.addEventListener("change",e=>{ANALYSIS_PROFILE.mode=e.target.value;if(LAST){applyAnalysisProfile(LAST);renderRecommendationEngine(LAST);renderDimensions(LAST)}});
-$("profileRecency")?.addEventListener("input",e=>{ANALYSIS_PROFILE.recency=Number(e.target.value)/100;if(LAST){LAST.deepInteraction=computeMeaningfulSocialInteraction(LAST);renderRecommendationEngine(LAST)}});
-$("profileEngagement")?.addEventListener("input",e=>{ANALYSIS_PROFILE.engagement=Number(e.target.value)/100;if(LAST){applyAnalysisProfile(LAST);renderRecommendationEngine(LAST);renderDimensions(LAST)}});
+buildDimensionButtons();
 applyLang();
+$("status").textContent="Ready — choose a WhatsApp .txt export.";
 </script>
 </body>
 </html>
